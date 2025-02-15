@@ -1,0 +1,216 @@
+﻿@page "/"
+<PageTitle>Home</PageTitle>
+
+<RadzenText TextStyle="TextStyle.DisplayH4"><stong>Channels</stong></RadzenText>
+<RadzenText TextStyle="TextStyle.Body2"><strong>75% Closed Rate | 90% Persistency | 95% First-Payment</strong></RadzenText>
+
+<RadzenTabs RenderMode="TabRenderMode.Client" @bind-SelectedIndex=@selectedIndex class="no-uppercase-tabs">
+	<Tabs>
+		<RadzenTabsItem Text="Call">
+			<RadzenRow>
+				<RadzenColumn Size="12" SizeLG="8" class="rz-p-5">
+					<HomeCallHistoryComponent Products="@products" />
+				</RadzenColumn>
+				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5 rz-shadow-6">
+					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
+					<P>
+						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
+					</P>
+				</RadzenColumn>
+			</RadzenRow>
+		</RadzenTabsItem>
+		<RadzenTabsItem Text="SMS">
+			<RadzenRow>
+				<RadzenColumn Size="12" SizeLG="8">
+					@* <HomeSMSComponent Contacts="@Contacts" /> *@
+					<MessagingLayout Contacts="@Contacts" />
+				</RadzenColumn>
+				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5 rz-shadow-6">
+					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
+					<P>
+						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
+					</P>
+				</RadzenColumn>
+			</RadzenRow>
+		</RadzenTabsItem>
+		<RadzenTabsItem Text="Email">
+			<RadzenRow>
+				<RadzenColumn Size="12" SizeLG="8" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
+					@* <HomeEmailComponent /> *@
+					<HomeSMSComponent Contacts="@Contacts" />
+				</RadzenColumn>
+				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
+					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
+					<P>
+						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
+					</P>
+				</RadzenColumn>
+			</RadzenRow>
+		</RadzenTabsItem>
+		<RadzenTabsItem Text="Test">
+			<RadzenRow>
+				<RadzenColumn Size="12" SizeLG="8">
+					<Test />
+				</RadzenColumn>
+				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
+					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
+					<P>
+						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
+					</P>
+				</RadzenColumn>
+			</RadzenRow>
+		</RadzenTabsItem>
+		<RadzenTabsItem Text="NewSMS">
+			<RadzenRow>
+				<RadzenColumn Size="12" SizeLG="8" class="rz-p-5">
+					<NewSMS Contacts="@Contacts" />
+				</RadzenColumn>
+				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
+					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
+					<P>
+						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
+					</P>
+				</RadzenColumn>
+			</RadzenRow>
+		</RadzenTabsItem>
+	</Tabs>
+</RadzenTabs>
+
+
+@code {
+	int selectedIndex = 0;
+}
+@* Code block for Call History *@
+
+@code {
+	private List<Product> products = new();
+
+	protected override void OnInitialized()
+	{
+		// Load data
+		products = new List<Product>
+		{
+			new Product { Id = 1, Name = "Laptop", Category = "Electronics", Price = 999.99m, Stock = 5 },
+			new Product { Id = 2, Name = "Desk", Category = "Furniture", Price = 299.99m, Stock = 0 },
+			new Product { Id = 3, Name = "Monitor", Category = "Electronics", Price = 199.99m, Stock = 8 },
+			new Product { Id = 4, Name = "Phone", Category = "Electronics", Price = 19999.99m, Stock = 7 },
+			new Product { Id = 5, Name = "Cupboard", Category = "Furniture", Price = 6999.99m, Stock = 2 },
+			new Product { Id = 6, Name = "Mixer", Category = "Electronics", Price = 499.99m, Stock = 3 },
+			new Product { Id = 7, Name = "Client", Category = "Missed", Price = 39.99m, Stock = 2 },
+			new Product { Id = 8, Name = "Manager", Category = "Missed", Price = 23.99m, Stock = 3 },
+			new Product { Id = 9, Name = "Accountant", Category = "Missed", Price = 54.99m, Stock = 5 }
+		};
+
+		Contacts = new List<Contact>
+		{
+			new Contact
+			{
+				Name = "John Doe",
+				Email = "johndoe@gmail.com",
+				Messages = new List<Message>
+				{
+					new Message { Content = "Hello!", IsUserMessage = false, Timestamp = DateTime.Now.AddMinutes(-5) },
+					new Message { Content = "Hi there!", IsUserMessage = true, Timestamp = DateTime.Now.AddMinutes(-4) }
+				}
+			},
+			new Contact
+			{
+				Name = "Jane Smith",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Arpan Pandya",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Jigar Modi",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Arjun Vijayan",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Shubham Charjan",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Satya Prakash",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Prabu",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Alex KunjuKunju",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Adil Hunerkar",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Dilip Pagi",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			},
+			new Contact
+			{
+				Name = "Kirshnamurty Murugan",
+				Email = "janesmith@gmail.com",
+				Messages = new List<Message>()
+			}
+		};
+	}
+
+	public class Product
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+		public string Category { get; set; }
+		public decimal Price { get; set; }
+		public int Stock { get; set; }
+	}
+}
+
+@* Code block for Call History *@
+@code {
+	private List<Contact> Contacts = new List<Contact>();
+
+	public class Contact
+	{
+		// public string Name { get; set; }
+		// public List<Message> Messages { get; set; } = new List<Message>();
+
+		public string Name { get; set; }
+		public string Email { get; set; } // Add email for Gravatar
+		public List<Message> Messages { get; set; } = new();
+		public Message LastMessage => Messages.LastOrDefault();
+	}
+
+	public class Message
+	{
+		public string Content { get; set; }
+		public bool IsUserMessage { get; set; }
+		public DateTime Timestamp { get; set; }
+	}
+}

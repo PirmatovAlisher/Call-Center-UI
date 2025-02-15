@@ -1,0 +1,214 @@
+﻿@using static TelephonyUI.Pages.Home
+
+<RadzenCard Variant="Variant.Filled" Style="padding: 0px; height:670px" class="rz-border-radius-1 rz-shadow-6">
+
+	<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Normal" AlignItems="AlignItems.Normal" Gap="1px" class="rz-border-bottom">
+		<div class="rz-display-flex justify-content-between align-items-center rz-mx-3 rz-mt-3">
+			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start">
+				<RadzenText TextStyle="TextStyle.DisplayH5"><stong>SMS Messages</stong></RadzenText>
+			</RadzenStack>
+			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+				<RadzenButton Icon="add" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Medium" class="rz-border-radius-10 rz-shadow-6" />
+			</RadzenStack>
+		</div>
+		<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-ml-3">5 Active | 24 Today</RadzenText>
+	</RadzenStack>
+	<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Normal" AlignItems="AlignItems.Normal" Gap="1px">
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="15px" class="rz-m-3 rz-mr-0">
+			<RadzenButton Text="Active" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-background-color-info-lighter rz-border-radius-10" />
+			<RadzenButton Text="Previous" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small" class="rz-border-radius-10" />
+		</RadzenStack>
+	</RadzenStack>
+
+
+	<RadzenTabs TabPosition="TabPosition.Left" @bind-SelectedIndex="selectedTabIndex"
+				RenderMode="TabRenderMode.Client" class="contact-tabs">
+		<Tabs>
+			@foreach (var contact in Contacts)
+			{
+				<RadzenTabsItem Text="@contact.Name">
+					<Template>
+						<div style="display: flex; align-items: center; padding: 10px; width: 100%;">
+							<!-- Gravatar -->
+							<RadzenGravatar Text="@contact.Name" Size="40" Style="margin-right: 15px;" />
+
+							<!-- Contact Details -->
+							<div style="flex: 1; min-width: 0;">
+								<div style="font-weight: 500; font-size: 0.9rem;">@contact.Name</div>
+								@if (contact.LastMessage != null)
+								{
+									<div style="font-size: 0.8rem; color: #666;
+                                              white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+										@contact.LastMessage.Content
+									</div>
+									<div style="font-size: 0.75rem; color: #999;">
+										@contact.LastMessage.Timestamp
+									</div>
+								}
+							</div>
+						</div>
+					</Template>
+					<ChildContent>
+						<!-- Chat Area -->
+						<div class="d-flex flex-column" style="height: 100%;">
+							<!-- Message History -->
+							<div class="flex-grow-1 overflow-auto mb-3">
+								@foreach (var message in contact.Messages)
+								{
+									<div style="margin: 10px 0; text-align: @(message.IsUserMessage ? "right" : "left")">
+										<RadzenCard Style="@messageStyle(message)">
+											@message.Content
+											<div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+												@message.Timestamp.ToString("g")
+											</div>
+										</RadzenCard>
+									</div>
+								}
+							</div>
+
+							<!-- Message Input -->
+							<div style="border-top: 1px solid #ddd; padding-top: 20px;">
+								<RadzenTextArea @bind-Value="@NewMessage" Placeholder="Type your message..."
+												Rows="3" Style="margin-bottom: 10px;" />
+								<RadzenButton Text="Send" Icon="send" Click="@SendMessage"
+											  Style="float: right;" Disabled="@(string.IsNullOrEmpty(NewMessage))" />
+							</div>
+						</div>
+					</ChildContent>
+				</RadzenTabsItem>
+			}
+		</Tabs>
+	</RadzenTabs>
+
+</RadzenCard>
+
+@code {
+	[Parameter]
+	public List<Contact> Contacts { get; set; } = new();
+	private int selectedTabIndex = -1;
+	private string NewMessage { get; set; }
+	private Contact SelectedContact => selectedTabIndex >= 0 ? Contacts[selectedTabIndex] : null;
+
+
+
+	private string messageStyle(Message message)
+	{
+		return $"background-color: {(message.IsUserMessage ? "#e3f2fd" : "#ffffff")}; " +
+						"padding: 10px; " +
+						"border-radius: 15px; " +
+						"max-width: 70%; " +
+						"box-shadow: 0 1px 3px rgba(0,0,0,0.12); " +
+						"display: inline-block;";
+	}
+
+	private void SendMessage()
+	{
+		if (!string.IsNullOrWhiteSpace(NewMessage) && SelectedContact != null)
+		{
+			SelectedContact.Messages.Add(new Message
+				{
+					Content = NewMessage,
+					IsUserMessage = true,
+					Timestamp = DateTime.Now
+				});
+
+			NewMessage = string.Empty;
+			StateHasChanged();
+		}
+	}
+}
+
+<style>
+	/* Custom tabs styling */
+	.contact-tabs .rz-tabnav {
+		width: 100%;
+		padding: 0;
+	}
+
+	.contact-tabs .rz-tabheader {
+		border: none !important;
+		border-radius: 0 !important;
+	}
+
+	.contact-tabs .rz-tabheader-item {
+		margin: 0 !important;
+		border-radius: 0 !important;
+		border-bottom: 1px solid #eee !important;
+	}
+
+		.contact-tabs .rz-tabheader-item.rz-state-active {
+			background-color: #f8f9fa !important;
+			border-right: 3px solid #2196F3 !important;
+		}
+
+		.contact-tabs .rz-tabheader-item:not(.rz-state-active):hover {
+			background-color: #f8f9fa !important;
+		}
+
+	/* Enhanced contact list styling */
+	.contact-tabs .rz-tabheader-item {
+		padding: 0 !important;
+		height: auto !important;
+	}
+
+		.contact-tabs .rz-tabheader-item .rz-tabheader-item-content {
+			padding: 0 !important;
+			width: 100%;
+		}
+
+		.contact-tabs .rz-tabheader-item.rz-state-active {
+			background-color: #f5f5f5 !important;
+			border-right: 3px solid #2196F3 !important;
+		}
+
+		/* Hover effect */
+		.contact-tabs .rz-tabheader-item:not(.rz-state-active):hover {
+			background-color: #f8f9fa !important;
+		}
+
+	/* Gravatar styling */
+	.rz-gravatar {
+		border-radius: 50% !important;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+	}
+</style>
+<style>
+	/* Contact list styling */
+	.contact-item {
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		width: 100%;
+	}
+
+	.contact-info {
+		flex-grow: 1;
+		min-width: 0;
+	}
+
+	/* Message bubbles */
+	.message-bubble {
+		max-width: 70%;
+		padding: 8px 12px;
+		border-radius: 15px;
+		margin: 5px 0;
+		position: relative;
+	}
+
+	.receiver {
+		background: #f1f0f0;
+		align-self: flex-start;
+	}
+
+	.sender {
+		background: #007bff;
+		color: white;
+		align-self: flex-end;
+	}
+
+	.message-time {
+		font-size: 0.75rem;
+		opacity: 0.8;
+		text-align: right;
+	}
+</style>

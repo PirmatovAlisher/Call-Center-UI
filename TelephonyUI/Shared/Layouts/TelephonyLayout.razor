@@ -1,0 +1,30 @@
+﻿@using TelephonyUI.Shared.Components._TelephonyLayout
+@inherits LayoutComponentBase
+<HeadContent>
+	<RadzenTheme Theme="material" />
+</HeadContent>
+<RadzenComponents />
+
+<RadzenLayout>
+	<Header ToggleMenu="@ToggleSidebar" />
+
+	<Sidebar @bind-IsExpanded="@sidebarExpanded" />
+
+	<RadzenBody>
+		<div class="rz-p-4">
+			@Body
+		</div>
+	</RadzenBody>
+
+	<Footer />
+</RadzenLayout>
+
+@code {
+	private bool sidebarExpanded = true;
+
+	private void ToggleSidebar()
+	{
+		sidebarExpanded = !sidebarExpanded;
+		StateHasChanged();
+	}
+}
