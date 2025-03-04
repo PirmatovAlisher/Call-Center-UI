@@ -114,3 +114,47 @@ code {
     text-transform: none !important; /* Disable uppercase */
     font-weight: normal; /* Optional: Add other styles */
 }
+
+/* Mask input for call pop up */
+.masked-input input {
+    -webkit-text-security: disc;
+    -moz-text-security: disc;
+    text-security: disc;
+    position: relative;
+}
+
+/* Remove default mask symbols */
+.masked-input .rz-mask-symbol {
+    display: none;
+}
+
+
+/* Calling top */
+.custom-dialog-theme {
+    overflow: hidden !important;
+    top: 55px !important;
+    height: 70px !important;
+    width: 100% !important;
+    min-height: 70px !important;
+    background: #e8f5fc !important;
+    border-bottom: 4px solid #4a90e2 !important;
+    border-radius: 0px !important;
+}
+
+    .custom-dialog-theme .rz-dialog-side-content {        
+        padding: 0px !important;
+    }
+
+/* calling window top*/
+.call-window {
+    position: sticky;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    padding: 0px;
+    height: 70px;
+    width: 100%;
+    border-bottom: 4px solid #31708f;
+    margin-bottom: 10px;
+    z-index: 10000;
+}

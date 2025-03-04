@@ -1,6 +1,6 @@
 ﻿@using static TelephonyUI.Pages.Home
 @inject IJSRuntime JSRuntime
-@* MessagingLayout.razor *@
+
 <RadzenCard Variant="Variant.Filled" Style="padding: 0px; height:670px; overflow: hidden;" class="rz-border-radius-1 rz-shadow-6">
 	<div class="messaging-container">
 		<RadzenTabs TabPosition="TabPosition.Left" @bind-SelectedIndex="selectedTabIndex" Style="height: 100%;" class="no-uppercase-tabs custom-tabview-nav custom-scrollable-vertical">
@@ -49,22 +49,37 @@
 				{
 					<RadzenTabsItem>
 						<Template>
-							<div class="no-uppercase" style="display: flex; align-items: center; padding: 10px; width: 100%;">
+							<div class="rz-display-flex align-items-center" style="width: 350px;">
 								<!-- Gravatar -->
-								<RadzenGravatar Text="@contact.Name" Size="40" Style="margin-right: 15px;" />
+								<RadzenGravatar Text="@contact.Name" Size="36" Style="margin-right: 15px;" />
+								<div class="no-uppercase" style="padding: 6px; width: 100%;">
 
-								<!-- Contact Details -->
-								<div style="flex: 1; min-width: 0;">
-									<div style="font-weight: 500; font-size: 0.9rem;">@contact.Name</div>
+									<!-- Contact Details -->
+									<div class="rz-display-flex justify-content-between">
+										<div style="font-weight: 500; font-size: 0.9rem;">@contact.Name</div>
+										@if (contact.LastMessage != null)
+										{
+											<div style="font-size: 0.75rem; color: #999;">
+												@if (contact.LastMessage.Timestamp < DateTime.Today)
+												{
+													@contact.LastMessage.Timestamp.ToString("d/MM/yyy")
+												}
+												else
+												{
+													@contact.LastMessage.Timestamp.ToString("hh:mm tt")
+												}
+											</div>
+										}
+									</div>
 									@if (contact.LastMessage != null)
 									{
-										<p>@GetTruncatedText(contact.LastMessage.Content, 15)</p>
-										<div style="font-size: 0.75rem; color: #999;">
-											@contact.LastMessage.Timestamp
-										</div>
+										<p>@GetTruncatedText(contact.LastMessage.Content, 25)</p>
 									}
 								</div>
-							</div>
+							</div> 
+							
+
+							
 						</Template>
 						<ChildContent>
 							<!-- Right Side - Message View -->
@@ -271,7 +286,7 @@
 		z-index: 1;
 	}
 
-	
+
 
 	/* Scrollbar styling */
 	.message-history::-webkit-scrollbar {
@@ -283,12 +298,6 @@
 		border-radius: 4px;
 	}
 
-
-
-	
-
-</style>
-<style>
 
 	/* Custom class to make vertical tabs scrollable and hide the scrollbar */
 	.custom-scrollable-vertical .rz-tabview-nav {
@@ -331,38 +340,38 @@
 			/*border-bottom: none;*/
 		}
 
-	/**/
+		/**/
 
-	/**/
-	/* Tabs active state background color */
+		/**/
+		/* Tabs active state background color */
 
-	/* Target the active tab header in left-positioned Radzen Tabs */
-	.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-tabview-selected,
-	.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-state-focused {
-		/*background-color: #e3f2fd !important;*/ /* Active background color */
-		background-color: var(--rz-background-color-info-lighter, #e8f5fc) !important;
-		color: #333 !important; /* Active text color */
-	}
-
-		/* Ensure the inner anchor text also inherits the active styling */
-		.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-tabview-selected a,
-		.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-state-focused a {
-			/*color: #333 !important;*/
+		/* Target the active tab header in left-positioned Radzen Tabs */
+		.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-tabview-selected,
+		.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-state-focused {
+			/*background-color: #e3f2fd !important;*/ /* Active background color */
+			background-color: var(--rz-background-color-info-lighter, #e8f5fc) !important;
+			color: #333 !important; /* Active text color */
 		}
 
-	/**/
+			/* Ensure the inner anchor text also inherits the active styling */
+			.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-tabview-selected a,
+			.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-state-focused a {
+				/*color: #333 !important;*/
+			}
+
+		/**/
 
 
 
-	/**/
-	/* tab navs' vertical line position to left and give width  */
+		/**/
+		/* tab navs' vertical line position to left and give width  */
 
-	/* Remove the default left border and add a right border */
-	.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-tabview-selected,
-	.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-state-focused {
-		border-right: none !important; /* Remove any right border */
-		border-left: 4px solid #31708f !important; /* Active indicator on the left */
-	}
+		/* Remove the default left border and add a right border */
+		.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-tabview-selected,
+		.rz-tabview.rz-tabview-left .rz-tabview-nav li.rz-state-focused {
+			border-right: none !important; /* Remove any right border */
+			border-left: 4px solid #31708f !important; /* Active indicator on the left */
+		}
 
 	/* Ensure every tab item reserves space by having a transparent left border */
 	.rz-tabview.rz-tabview-left .rz-tabview-nav li {

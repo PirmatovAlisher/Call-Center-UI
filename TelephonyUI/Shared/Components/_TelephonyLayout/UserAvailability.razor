@@ -1,0 +1,171 @@
+﻿
+<!-- The container for our status display -->
+<div class="status-control rz-background-color-primary-lighter" @onclick="ToggleDropdown">
+    <!-- Colored status dot -->
+    <span class="status-dot @(SetBackground(CurrentStatus))"></span>
+    @* <span class="status-dot @(GetStatusCss(CurrentStatus))"></span> *@
+
+    <!-- Status name and current time -->
+    <span class="status-text">@CurrentStatus | @DateTime.Now.ToString("HH:mm")</span>
+
+    <!-- Down arrow -->
+    @* <span class="status-arrow">▼</span> *@
+    <RadzenIcon Icon="keyboard_arrow_down" />
+
+    <!-- Put the dropdown INSIDE this container so it positions correctly -->
+    @if (showDropdown)
+    {
+        <div class="status-dropdown" @onclick:stopPropagation>
+            <ul>
+                <li @onclick="() => SetStatus(AgentStatus.Available)">Available</li>
+                <li @onclick="() => SetStatus(AgentStatus.OnCall)">On Call</li>
+                <li @onclick="() => SetStatus(AgentStatus.AfterCallWork)">After Call Work</li>
+                <li @onclick="() => SetStatus(AgentStatus.Break)">Break</li>
+                <li @onclick="() => SetStatus(AgentStatus.Offline)">Offline</li>
+            </ul>
+        </div>
+    }
+</div>
+
+@code {
+
+    private bool showDropdown = false;
+    public AgentStatus CurrentStatus { get; set; } = AgentStatus.Offline;
+
+    private void ToggleDropdown()
+    {
+        showDropdown = !showDropdown;
+    }
+
+    private void SetStatus(AgentStatus status)
+    {
+        CurrentStatus = status;
+        showDropdown = false;
+    }
+
+    private string GetStatusCss(AgentStatus status)
+    {
+        return status switch
+        {
+            AgentStatus.Available => "status-available",
+            AgentStatus.OnCall => "status-oncall",
+            AgentStatus.AfterCallWork => "status-aftercall",
+            AgentStatus.Break => "status-break",
+            AgentStatus.Offline => "status-offline",
+            _ => "status-offline"
+        };
+    }
+
+    private string SetBackground(AgentStatus status)
+    {
+        return status switch
+        {
+            AgentStatus.Available => "rz-background-color-success",
+            AgentStatus.OnCall => "rz-background-color-info",
+            AgentStatus.AfterCallWork => "rz-background-color-warning",
+            AgentStatus.Break => "rz-background-color-secondary-dark",
+            AgentStatus.Offline => "rz-background-color-danger",
+            _ => "rz-background-color-white"
+        };
+    }
+
+    // Optional: Refresh the time every minute so "HH:mm" updates automatically
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var timer = new System.Timers.Timer(60000);
+            timer.Elapsed += (s, e) =>
+            {
+                InvokeAsync(StateHasChanged);
+            };
+            timer.Start();
+        }
+    }
+}
+
+
+<style>
+    /* Container that looks like your reference image (rounded, white border, navy background) */
+    .status-control {
+        display: inline-flex;
+        align-items: center;
+        border: 2px solid white; /* White border as in your screenshot */
+        border-radius: 8px; /* Rounded corners */
+        padding: 0.5rem 1rem;
+        /*background-color: #0A0A3C; */ /* Deep navy background (adjust if needed) */
+        color: white;
+        cursor: pointer;
+        position: relative; /* Must be relative so the dropdown can position correctly */
+    }
+
+    /* Small colored dot for current status */
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    /* Different colors for each status */
+    .status-available {
+        background-color: green;
+    }
+
+    .status-oncall {
+        background-color: blue;
+    }
+
+    .status-aftercall {
+        background-color: orange;
+    }
+
+    .status-break {
+        background-color: yellow;
+    }
+
+    .status-offline {
+        background-color: gray;
+    }
+
+    /* Text next to the dot (e.g. "Available | 10:27") */
+    .status-text {
+        margin-right: 8px;
+    }
+
+    /* Down arrow on the far right */
+    .status-arrow {
+        margin-left: auto;
+    }
+
+    /* Dropdown menu that appears below the control */
+    .status-dropdown {
+        position: absolute;
+        top: 100%; /* Directly below .status-control */
+        left: 0;
+        background-color: white;
+        color: black;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-top: 4px;
+        z-index: 9999;
+        min-width: 150px; /* Enough width for status names */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+        .status-dropdown ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .status-dropdown li {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+            .status-dropdown li:hover {
+                background-color: #f0f0f0;
+            }
+
+            </style>

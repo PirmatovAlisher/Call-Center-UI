@@ -1,5 +1,8 @@
 ﻿@using TelephonyUI.Shared.Components._TelephonyLayout
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject CallService CallService
+
 <HeadContent>
 	<RadzenTheme Theme="material" />
 </HeadContent>
@@ -10,10 +13,19 @@
 
 	<Sidebar @bind-IsExpanded="@sidebarExpanded" />
 
-	<RadzenBody>
+	<RadzenBody Style="padding: 0px !important;">
+
+		@if (CallService.IsCallActive)
+		{
+			<CallingWindowTop />
+		}
+
 		<div class="rz-p-4">
 			@Body
 		</div>
+
+
+
 	</RadzenBody>
 
 	<Footer />
@@ -21,6 +33,16 @@
 
 @code {
 	private bool sidebarExpanded = true;
+
+	protected override void OnInitialized()
+	{
+		CallService.OnCallStateChanged += StateHasChanged;
+	}
+
+	public void Dispose()
+	{
+		CallService.OnCallStateChanged -= StateHasChanged;
+	}
 
 	private void ToggleSidebar()
 	{

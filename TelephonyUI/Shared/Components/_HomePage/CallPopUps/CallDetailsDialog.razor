@@ -1,0 +1,68 @@
+﻿@inject DialogService DialogService
+
+
+<RadzenStack Orientation="Orientation.Horizontal" class="rz-p-8" JustifyContent="JustifyContent.Center" Gap="50px" Style="height: 550px;">
+		<RadzenCard Variant="Variant.Outlined" class="rz-background-color-info-lighter rz-border-radius-6 rz-p-8">
+			<h5><strong>Call Details</strong></h5>
+			<br />
+			<p>Call Id : <strong>@call.Id</strong></p>
+			<p>CallSid : <strong>@call.CallSid</strong></p>
+			<p>Caller Number : <strong>@call.CallerNumber</strong></p>
+			<p>Destination Number : <strong>@call.DestinationNumber</strong></p>
+			<p>Start Time : <strong>@call.StartTime</strong></p>
+			<p>End Time : <strong>@call.EndTime</strong></p>
+			<p>Call Type : <strong>@call.CallType.ToString()</strong></p>
+			<p>Status: <strong>@call.Status.ToString()</strong></p>
+			<p>Wait Time: <strong>@call.WaitTime.ToString()</strong></p>
+			<p>Talk Time: <strong>@call.TalkTime.ToString()</strong></p>
+			<p>Recorded: <strong>@(call.IsRecorded ? "yes" : "no")</strong></p>
+			<p>Recording Path: <strong>@call.RecordingUrl</strong></p>
+		</RadzenCard>
+		<RadzenStack Orientation="Orientation.Vertical" Gap="15px">
+		<RadzenCard Variant="Variant.Outlined" class="rz-background-color-warning-lighter rz-border-radius-6 rz-p-8">
+				<h5><strong>Contacted Agent info</strong></h5>
+				<br />
+				@if (call.Agent != null)
+				{
+					<p>Agent Id: <strong>@call.AgentId</strong></p>
+					<p>Agent Full Name: <strong>@call.Agent.FirstName @call.Agent.LastName</strong></p>
+					<p>Agent Extension: <strong>@call.Agent.Extension</strong></p>
+				}
+				else
+				{
+					<p>Agent Info: <strong>Not found</strong></p>
+				}
+			</RadzenCard>
+		<RadzenCard Variant="Variant.Outlined" class="rz-background-color-success-lighter rz-border-radius-6 rz-p-8">
+				<h5><strong>Contacted Customer info</strong></h5>
+				<br />
+				@if (call.Customer != null)
+				{
+					<p>Customer Id: <strong>@call.CustomerId</strong></p>
+					<p>Customer Full Name: <strong>@call.Customer.FirstName @call.Customer.LastName</strong></p>
+					<p>Customer Phone Number: <strong>@call.Customer.PhoneNumber</strong></p>
+					<p>Customer Email: <strong>@call.Customer.Email</strong></p>
+					<p>Customer Account Number: <strong>@call.Customer.AccountNumber</strong></p>
+					<p>Customer Account Type: <strong>@call.Customer.Type.ToString()</strong></p>
+				}
+				else
+				{
+					<p>Customer Info: <strong>Not found</strong></p>
+				}
+			</RadzenCard>
+		</RadzenStack>
+	</RadzenStack>
+
+@code {
+	[Parameter]
+	public Call Call { get; set; } = new();
+
+
+	private Call call { get; set; } = new();
+
+
+	protected override async Task OnParametersSetAsync()
+	{
+		call = Call;
+	}
+}

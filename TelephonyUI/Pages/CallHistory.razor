@@ -1,21 +1,39 @@
-﻿@inherits Microsoft.AspNetCore.Components.ComponentBase
+﻿@page "/call-history"
+
+
+@inherits Microsoft.AspNetCore.Components.ComponentBase
 @inject DialogService DialogService
-@inject DialPadService DialPadService
+@inject NotificationService NotificationService
+@inject ContextMenuService ContextMenuService
+@inject IDataExportService ExportService
+@using ClosedXML.Excel
+@using System.Data
+
+@inject IJSRuntime JSRuntime
 
 
-<RadzenCard Variant="Variant.Filled" Style="height:670px" class="rz-shadow-6">
+
+<RadzenCard Variant="Variant.Filled" Style="height: 850px">
 
 	<div class="rz-display-flex justify-content-between px-1">
 		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start">
-			<RadzenText TextStyle="Radzen.Blazor.TextStyle.H4">Call History</RadzenText>
+			<RadzenText TextStyle="Radzen.Blazor.TextStyle.H4">Company Call History</RadzenText>
 		</RadzenStack>
 		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-			<RadzenButton Text="New Call" Click="@(() => DialPadService.OpenDialPad())" Icon="dialpad" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small" class="no-uppercase rz-shadow-6" />
+			<RadzenSplitButton Text="Download" Click="@(args => DownloadOptions(args))" Disabled="isExporting" Icon="download" Size="ButtonSize.Medium"
+							   class="no-uppercase rz-border-radius-4" AlwaysOpenPopup=true ButtonStyle="ButtonStyle.Primary" DropDownIcon="more_vert" Variant="Variant.Outlined">
+				<ChildContent>
+					<RadzenSplitButtonItem Text="PDF (Portrait)" Value="1" />
+					<RadzenSplitButtonItem Text="PDF (Landscape)" Value="2" />
+					<RadzenSplitButtonItem Text="XLSX..." Value="3" />
+					<RadzenSplitButtonItem Text="CSV (Formatted)" Value="4" />
+					<RadzenSplitButtonItem Text="Voicemails will not be" Value="5" Disabled="true" />
+					<RadzenSplitButtonItem Text="included in exports." Value="6" Disabled="true" />
+				</ChildContent>
+			</RadzenSplitButton>
 		</RadzenStack>
 	</div>
-	<RadzenText TextStyle="Radzen.Blazor.TextStyle.Subtitle2" class="rz-mb-3">
-		@FilteredCalls.Where(x => x.StartTime == DateTime.Today).Count() Calls Today | @FilteredCalls.Where(x => x.CallType == CallType.Missed).Count() Missed
-	</RadzenText>
+	<RadzenText TextStyle="Radzen.Blazor.TextStyle.Subtitle2" class="rz-mb-3">240 Calls Today | 84% Company Close Rate</RadzenText>
 
 	<RadzenRow JustifyContent="JustifyContent.SpaceBetween" class="rz-mb-3">
 		<!-- Filter Presets -->
@@ -46,6 +64,22 @@
 		</RadzenStack>
 
 		<RadzenStack Orientation="Orientation.Horizontal" Gap="15px" AlignItems="AlignItems.Center">
+			@if (selectedCalls.Any())
+			{
+				<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
+							 class="rz-background-color-success-lighter rz-border-radius-6" Style="width: 200px; height: 40px;">
+					<div class="rz-text-secondary">
+						Selected @selectedCalls.Count() of @FilteredCalls.Count() calls
+					</div>
+				</RadzenStack>
+			}
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
+						 class="rz-background-color-warning-lighter rz-border-radius-6" Style="width: 200px; height: 40px;">
+				<div class="rz-text-secondary">
+					Showing @FilteredCalls.Count() of @SeedDataProvider.Calls.Count calls
+				</div>
+			</RadzenStack>
+
 			<!-- Search Box -->
 			<RadzenTextBox @bind-Value="@searchTerm"
 						   Placeholder="Search..."
@@ -55,10 +89,25 @@
 	</RadzenRow>
 
 
-	<RadzenDataGrid @ref="grid" TItem="Call" Data="FilteredCalls" IsLoading="@isLoading"
-					Style="height: 490px ; overflow-y: auto;" AllowSorting="true">
-
+	<RadzenDataGrid @ref="grid" TItem="Call" Data="FilteredCalls" IsLoading="@isLoading" @bind-Value=@selectedCalls
+					AllowRowSelectOnRowClick="true" SelectionMode="DataGridSelectionMode.Multiple"
+					AllowSorting="true" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Center" PageSize="9">
+		
 		<Columns>
+
+			<!-- Selection Check box -->
+			<RadzenDataGridColumn TItem="Call" Sortable="false" Filterable="false" Width="25px">
+				<HeaderTemplate>
+					<RadzenCheckBox TValue="bool"
+									Value="@IsAllSelected"
+									Change="@(async _ => await ToggleSelectAll())" />
+				</HeaderTemplate>
+				<Template Context="call">
+					<RadzenCheckBox TValue="bool"
+									Value="@(selectedCalls.Contains(call))"
+									Change="@(_ => ToggleSelection(call))" />
+				</Template>
+			</RadzenDataGridColumn>
 
 			<!-- Call Type -->
 			<RadzenDataGridColumn Property="@nameof(Call.CallType)" TItem="Call" Title="Call Type" Width="35px">
@@ -81,6 +130,22 @@
 						default:
 							<RadzenIcon IconStyle="IconStyle.Base" Icon="remove" />
 							break;
+					}
+				</Template>
+			</RadzenDataGridColumn>
+
+			<!-- Agent Column -->
+			<RadzenDataGridColumn Property="@nameof(Call.Agent.Id)" TItem="Call" Title="Agent" Width="70px">
+				<Template Context="call">
+					@if (call.Agent != null)
+					{
+						<span class="rz-text-secondary">
+							@HighlightMatch(call.Agent.Extension)
+						</span>
+						<br />
+						<span class="rz-text-primary text-sm">
+							Agent: @HighlightMatch(call.Agent.FirstName) @HighlightMatch(call.Agent.LastName)
+						</span>
 					}
 				</Template>
 			</RadzenDataGridColumn>
@@ -115,7 +180,7 @@
 			</RadzenDataGridColumn>
 
 			<!-- Customer Type Column -->
-			<RadzenDataGridColumn Property="@nameof(Call.Customer)" TItem="Call" Title="Account Status" Width="50px">
+			<RadzenDataGridColumn Property="@nameof(Call.Customer)" TItem="Call" Title="Account Status" Width="55px">
 				<Template Context="call">
 					@if (call.Customer != null)
 					{
@@ -149,7 +214,7 @@
 			</RadzenDataGridColumn>
 
 			<!-- Customer Account Number Column -->
-			<RadzenDataGridColumn Property="@nameof(Call.Customer.AccountNumber)" TItem="Call" Title="Account Number" Width="55px">
+			<RadzenDataGridColumn Property="@nameof(Call.Customer.AccountNumber)" TItem="Call" Title="Account Number" Width="60px">
 				<Template Context="call">
 					@if (call.Customer != null)
 					{
@@ -159,6 +224,20 @@
 					{
 						<p>-</p>
 					}
+				</Template>
+			</RadzenDataGridColumn>
+
+			<!-- Waiting Time -->
+			<RadzenDataGridColumn Property="@nameof(Call.WaitTime)" TItem="Call" Title="Waiting Time" Width="60px">
+				<Template Context="call">
+					@call.WaitTime.ToString()
+				</Template>
+			</RadzenDataGridColumn>
+
+			<!-- Talking Time -->
+			<RadzenDataGridColumn Property="@nameof(Call.TalkTime)" TItem="Call" Title="Talk Time" Width="60px">
+				<Template Context="call">
+					@call.TalkTime.ToString()
 				</Template>
 			</RadzenDataGridColumn>
 
@@ -184,7 +263,7 @@
 			</RadzenDataGridColumn>
 
 			<!-- Actions Column -->
-			<RadzenDataGridColumn TItem="Call" Title="Actions" Width="45px">
+			<RadzenDataGridColumn TItem="Call" Title="Actions" Width="50px">
 				<Template Context="call">
 					<RadzenSplitButton Text="more" Click="@(args => ShowActions(args, call))"
 									   class="no-uppercase" AlwaysOpenPopup=true ButtonStyle="ButtonStyle.Base" DropDownIcon="more_vert" Variant="Variant.Text">
@@ -281,9 +360,9 @@
 		await DialogService.OpenAsync<CallDetailsDialog>(
 			title: "",
 			parameters: new Dictionary<string, object>()
-																																																					{
+																																																			{
 				{"Call", call}
-																																																					},
+																																																			},
 			options: new DialogOptions()
 				{
 					Width = "1000px",
@@ -368,5 +447,161 @@
 		return (MarkupString)text.Replace(searchTerm,
 									$"<strong class=\"rz-background-color-warning-dark\">{searchTerm}</strong>",
 									StringComparison.OrdinalIgnoreCase);
+	}
+}
+
+@* Row Selection *@
+@code {
+	private IList<Call> selectedCalls = new List<Call>();
+	private bool isExporting;
+
+	private bool IsAllSelected =>
+		FilteredCalls.Any() && selectedCalls.Count() == FilteredCalls.Count();
+
+	private async Task ToggleSelectAll()
+	{
+		if (IsAllSelected)
+		{
+			selectedCalls = new List<Call>();
+		}
+		else
+		{
+			selectedCalls = new List<Call>(FilteredCalls);
+		}
+		await grid.Reload();
+		StateHasChanged();
+	}
+
+	private void ToggleSelection(Call call)
+	{
+		if (selectedCalls.Contains(call))
+		{
+			selectedCalls.Remove(call);
+		}
+		else
+		{
+			selectedCalls.Add(call);
+		}
+
+		// Optional: Force grid refresh if needed
+		StateHasChanged();
+	}
+
+	private async Task DownloadOptions(RadzenSplitButtonItem item)
+	{
+		if (item != null)
+		{
+			switch (item.Value)
+			{
+				case "1":
+					await ExportCallsToPDF(false);
+					break;
+				case "2":
+					await ExportCallsToPDF(true);
+					break;
+				case "3":
+					await ExportCallsToExcel();
+					break;
+				case "4":
+					await ExportCallsToCsv();
+					break;
+				default:
+					await ExportCallsToExcel();
+					break;
+			}
+		}
+	}
+
+}
+
+@* File generations *@
+@code
+{
+	private async Task ExportCallsToExcel()
+	{
+		try
+		{
+			isExporting = true; 
+			NotificationService.Notify(new NotificationMessage
+				{
+					Severity = NotificationSeverity.Info,
+					Summary = "Exporting...",
+					Duration = 4000
+				});
+
+			var data = selectedCalls.Any() ? selectedCalls : SeedDataProvider.Calls;
+
+			await ExportService.ExportToExcel(data);
+		}
+		catch (Exception ex)
+		{
+			NotificationService.Notify(NotificationSeverity.Error, "Export Failed", ex.Message, 5000);
+		}
+		finally
+		{
+			isExporting = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportCallsToCsv()
+	{
+		try
+		{
+			isExporting = true;
+			NotificationService.Notify(new NotificationMessage
+				{
+					Severity = NotificationSeverity.Info,
+					Summary = "Exporting...",
+					Duration = 4000
+				});
+
+
+			var data = selectedCalls.Any() ? selectedCalls : SeedDataProvider.Calls;
+
+			await ExportService.ExportToFormattedCsv(data);
+		}
+		catch (Exception ex)
+		{
+			NotificationService.Notify(NotificationSeverity.Error, "Export Failed", ex.Message, 5000);
+		}
+		finally
+		{
+			isExporting = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportCallsToPDF(bool isLandscape)
+	{
+		try
+		{
+			isExporting = true;
+			NotificationService.Notify(new NotificationMessage
+				{
+					Severity = NotificationSeverity.Info,
+					Summary = "Preparing PDF export...",
+					Duration = 2000
+				});
+
+			var data = selectedCalls.Any() ? selectedCalls : SeedDataProvider.Calls;
+			await ExportService.ExportToPDF(data, isLandscape);
+
+		}
+		catch (Exception ex)
+		{
+			NotificationService.Notify(new NotificationMessage
+				{
+					Severity = NotificationSeverity.Error,
+					Summary = "PDF export failed",
+					Detail = ex.Message,
+					Duration = 5000
+				});
+		}
+		finally
+		{
+			isExporting = false;
+			StateHasChanged();
+		}
 	}
 }

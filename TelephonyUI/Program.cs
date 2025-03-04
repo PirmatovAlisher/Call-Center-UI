@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
+using TelephonyUI.Services;
+using TelephonyUI.Services.Interfaces;
 
 namespace TelephonyUI
 {
@@ -16,8 +18,15 @@ namespace TelephonyUI
 
             //Added Services:
             builder.Services.AddRadzenComponents();
-
-            await builder.Build().RunAsync();
+			builder.Services.AddScoped<IDataExportService, DataExportService>();
+			builder.Services.AddSingleton<CallService>();
+			builder.Services.AddScoped<DialPadService>();
+			builder.Services.AddScoped(sp => new HttpClient
+			{
+				BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+			});
+			
+			await builder.Build().RunAsync();
         }
     }
 }

@@ -1,11 +1,16 @@
-﻿<RadzenHeader class="rz-display-flex justify-content-between px-1">
+﻿@inject DialPadService DialPadService
+
+<RadzenHeader class="rz-display-flex justify-content-between px-1">
 
 	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
 		<RadzenSidebarToggle Click="@(OnToggleMenu)" />
 		<RadzenLabel Text="Call-Center" />
 	</RadzenStack>
 
-	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+		<UserAvailability/>
+		<RadzenButton Icon="dialpad" Click="@(() => DialPadService.OpenDialPad())" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Medium" />
+		<RadzenButton Icon="forum" Variant="Variant.Text" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Medium" />
 		<RadzenAppearanceToggle />
 		<RadzenProfileMenu>
 			<Template>

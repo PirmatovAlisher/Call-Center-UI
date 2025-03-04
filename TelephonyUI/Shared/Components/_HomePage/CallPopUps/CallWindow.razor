@@ -1,0 +1,61 @@
+﻿@using System.Timers
+
+@inject DialogService DialogService
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Style="height: 70px; padding: 0px 30px;">
+	<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center" Gap="8px">
+		<RadzenIcon Icon="phone_in_talk" />
+		<RadzenText Text="Calling" TextStyle="TextStyle.Body1" Style="margin: 0px; font-weight:700" />
+		<RadzenText Text="@($"{phoneNumber} - ")" TextStyle="TextStyle.Body1" Style="margin: 0px;" />
+		<RadzenText Text="@elapsedTimeFormatted" TextStyle="TextStyle.Body1" Style="margin: 0px;" />
+	</RadzenStack>
+	<RadzenButton Click="@(() => DialogService.Close(null))"
+				  Icon="call_end" Text="End Call" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Light" class="rz-border-radius-6 no-uppercase" />
+</RadzenStack>
+
+
+@code {
+	[Parameter]
+	public string PhoneNumber { get; set; } = string.Empty;
+
+	private string phoneNumber { get; set; } = string.Empty;
+
+	// Property to hold the formatted elapsed time
+	private string elapsedTimeFormatted = "0:00:00";
+	private DateTime startTime;
+	private Timer timer;
+
+	protected override void OnInitialized()
+	{
+		phoneNumber = PhoneNumber;
+
+		// Start the timer when the component initializes
+		startTime = DateTime.Now;
+		timer = new Timer(1000); // Trigger every 1 second
+		timer.Elapsed += OnTimerElapsed;
+		timer.Start();
+	}
+
+	private void EndCall()
+	{
+		DialogService.Close(null);
+	}
+
+	private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+	{
+		// Calculate the elapsed time
+		var elapsed = DateTime.Now - startTime;
+
+		// Format the elapsed time as hours:minutes:seconds
+		elapsedTimeFormatted = $"{(int)elapsed.TotalHours}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}";
+
+		// Since this event is raised on a background thread, ensure the UI is updated on the main thread.
+		InvokeAsync(StateHasChanged);
+	}
+
+	public void Dispose()
+	{
+		// Clean up the timer when the component is disposed
+		timer?.Dispose();
+	}
+}

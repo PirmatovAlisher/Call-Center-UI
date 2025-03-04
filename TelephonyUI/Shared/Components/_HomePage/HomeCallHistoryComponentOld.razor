@@ -1,0 +1,125 @@
+﻿
+@inherits Microsoft.AspNetCore.Components.ComponentBase
+@implements IDisposable
+@inject DialPadService DialPadService
+@inject DialogService DialogService
+@inject CallService CallService
+@inject NotificationService NotificationService
+@inject ContextMenuService ContextMenuService
+
+<RadzenCard Variant="Variant.Filled" Style="height:670px" class="rz-shadow-6">
+
+	<div class="rz-display-flex justify-content-between px-1">
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start">
+			<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Call History</stong></RadzenText>
+		</RadzenStack>
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+			<RadzenButton Text="New Call" Click="@OpenDialPad" Icon="dialpad" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small" class="no-uppercase rz-shadow-6" />
+		</RadzenStack>
+	</div>
+	<RadzenText TextStyle="TextStyle.Subtitle2">7 Calls Today | 1 Missed</RadzenText>
+
+	<RadzenRow JustifyContent="JustifyContent.SpaceBetween">
+		<!-- Filter Presets -->
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="15px" class="rz-mb-3">
+			<RadzenButton Text="All"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Medium"
+						  Click="@(() => { activeFilter = null; ApplyFilters(); })"
+						  class="@(activeFilter == null ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+
+			<RadzenButton Text="Missed"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Medium"
+						  Click="@(() => { activeFilter = "Category == \"Missed\""; ApplyFilters(); })"
+						  class="@(activeFilter == "Category == \"Missed\"" ? "rz-background-color-danger-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+
+			<RadzenButton Text="In Stock"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Medium"
+						  Click="@(() => { activeFilter = "Stock > 0"; ApplyFilters(); })"
+						  class="@(activeFilter == "Stock > 0" ? "rz-background-color-warning-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+
+			<RadzenButton Text="Electronics"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Medium"
+						  Click="@(() => { activeFilter = "Category == \"Electronics\""; ApplyFilters(); })"
+						  class="@(activeFilter == "Category == \"Electronics\"" ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+			<RadzenButton Text="Furniture"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Medium"
+						  Click="@(() => { activeFilter = "Category == \"Furniture\""; ApplyFilters(); })"
+						  class="@(activeFilter == "Category == \"Furniture\"" ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+		</RadzenStack>
+
+		<!-- Search Box -->
+		<RadzenTextBox @bind-Value="@searchTerm"
+					   Placeholder="Search..."
+					   class="rz-mb-3"
+					   Style="min-width: 250px;"
+					   Change="@(_ => ApplyFilters())" />
+	</RadzenRow>
+
+	<RadzenDataGrid TItem="Product"
+					Data="@FilteredProducts"
+					AllowPaging="true"
+					AllowSorting="true"
+					PageSize="10"
+					Style="--rz-grid-header-background-color: #F5F5F5; --rz-grid-header-color: #000;">
+		<Columns>
+			<RadzenDataGridColumn TItem="Product" Property="Name" Title="Product" />
+			<RadzenDataGridColumn TItem="Product" Property="Category" Title="Category" />
+			<RadzenDataGridColumn TItem="Product" Property="Price" Title="Price" />
+			<RadzenDataGridColumn TItem="Product" Property="Stock" Title="Stock" />
+		</Columns>
+	</RadzenDataGrid>
+
+</RadzenCard>
+
+
+@code {
+	[Parameter]
+	public List<Product> Products { get; set; } = new();
+
+	private const string V = "rz-border-radius-10";
+	private List<Product> FilteredProducts = new();
+	private string activeFilter;
+	private string searchTerm;
+
+	protected override void OnInitialized()
+	{
+		CallService.OnCallStateChanged += StateHasChanged;
+	}
+
+	public void OpenDialPad()
+	{
+		DialPadService.OpenDialPad();
+	}
+
+	public void Dispose()
+	{
+		CallService.OnCallStateChanged -= StateHasChanged;
+	}
+
+	protected override void OnParametersSet()
+	{
+		ApplyFilters();
+	}
+
+	private void ApplyFilters()
+	{
+		var query = Products.AsQueryable();
+
+		// Apply preset filter
+		if (!string.IsNullOrEmpty(activeFilter))
+		{
+			query = query.Where(activeFilter);
+		}
+
+		// Apply search filter
+		if (!string.IsNullOrEmpty(searchTerm))
+		{
+			var searchFilter = $"(Name.Contains(\"{searchTerm}\") || Category.Contains(\"{searchTerm}\"))";
+			query = query.Where(searchFilter);
+		}
+
+		FilteredProducts = query.ToList();
+	}
+}
+
+

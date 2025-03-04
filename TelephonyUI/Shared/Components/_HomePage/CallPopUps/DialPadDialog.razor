@@ -1,0 +1,315 @@
+﻿@using System.Text.RegularExpressions
+@inject DialogService DialogService
+@inject CallService CallService
+@inject IJSRuntime JS
+
+
+<RadzenStack Orientation="Orientation.Vertical" Gap="10px" Style="display: inline-block; padding: 0px;" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+	<!-- Phone number display/input -->
+	<RadzenStack Orientation="Orientation.Horizontal" Gap="10px" Wrap="FlexWrap.Wrap">
+
+		<div style="position: relative; height: 56px; width: 260px; font-size: 24px;">
+			<!-- Static country code -->
+			<span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 2; pointer-events: none; color: #666;">
+				+998
+			</span>
+
+			<!-- Masked input -->
+			<RadzenMask @ref="maskedTextBox" @onkeyup="HandleKeyUp" @onkeydown="HandleKeyDown"
+						Value="@phoneNumber"
+						Mask="**-***-**-**"
+						Placeholder="__-___-__-__"
+						CharacterPattern="[0-9]"
+						Style="padding-left: 70px;height: 56px; width: 100%; font-size: 24px;"
+						class="masked-input rz-border-radius-6"
+						Name="PhoneNumber">
+			</RadzenMask>
+		</div>
+
+	</RadzenStack>
+	<!-- Row 1 -->
+	<RadzenStack Orientation="Orientation.Horizontal" Gap="10px" Wrap="FlexWrap.Wrap">
+		<RadzenButton Click="@(() => AddDigit("1"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">1</div>
+					<p> </p>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("2"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">2</div>
+					<div style="font-size: 10px; color: #666;">ABC</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("3"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">3</div>
+					<div style="font-size: 10px; color: #666;">DEF</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+	</RadzenStack>
+	<!-- Row 2 -->
+	<RadzenStack Orientation="Orientation.Horizontal" Gap="10px" Wrap="FlexWrap.Wrap">
+		<RadzenButton Click="@(() => AddDigit("4"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">4</div>
+					<div style="font-size: 10px; color: #666;">GHI</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("5"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">5</div>
+					<div style="font-size: 10px; color: #666;">JKL</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("6"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">6</div>
+					<div style="font-size: 10px; color: #666;">MNO</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+	</RadzenStack>
+	<!-- Row 3 -->
+	<RadzenStack Orientation="Orientation.Horizontal" Gap="10px" Wrap="FlexWrap.Wrap">
+		<RadzenButton Click="@(() => AddDigit("7"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">7</div>
+					<div style="font-size: 10px; color: #666;">PQRS</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("8"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">8</div>
+					<div style="font-size: 10px; color: #666;">TUV</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("9"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">9</div>
+					<div style="font-size: 10px; color: #666;">WXYZ</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+	</RadzenStack>
+	<!-- Row 4 -->
+	<RadzenStack Orientation="Orientation.Horizontal" Gap="10px" Wrap="FlexWrap.Wrap">
+		<RadzenButton Click="@(() => AddDigit("*"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<div style="line-height: 1.2">*</div>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("0"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="0px">
+					<div style="line-height: 1.2">0</div>
+					<div style="font-size: 24px; color: #666;">+</div>
+				</RadzenStack>
+			</ChildContent>
+		</RadzenButton>
+
+		<RadzenButton Click="@(() => AddDigit("#"))"
+					  ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" class="rz-border-radius-10"
+					  Style="width: 80px; height: 80px; font-size: 32px;">
+			<ChildContent>
+				<div style="line-height: 1.2">#</div>
+			</ChildContent>
+		</RadzenButton>
+	</RadzenStack>
+	<!-- Call button -->
+	<RadzenStack Orientation="Orientation.Horizontal" Gap="15px" Wrap="FlexWrap.Wrap">
+
+		<RadzenButton 
+					  Disabled="@(phoneNumber.Length < 12)"
+					  ButtonStyle="ButtonStyle.Light" Icon="list_alt_add" Size="ButtonSize.Large" Variant="Variant.Flat" Shade="Shade.Light"
+					  class="rz-border-radius-6 no-uppercase" />
+		<RadzenButton Text="Call" Click="@CallNumber"
+					  Disabled="@(phoneNumber.Length < 12)"
+					  ButtonStyle="ButtonStyle.Success" Icon="call" Size="ButtonSize.Large" Variant="Variant.Filled" Shade="Shade.Light"
+					  class="rz-border-radius-6 no-uppercase" />
+		<RadzenButton Click="@HandleBackspace"
+					  Disabled="@string.IsNullOrEmpty(phoneNumber)"
+					  ButtonStyle="ButtonStyle.Light" Icon="backspace" Size="ButtonSize.Large" Variant="Variant.Flat" Shade="Shade.Light"
+					  class="rz-border-radius-6 no-uppercase" />
+	</RadzenStack>
+
+</RadzenStack>
+
+
+@code {
+	private string phoneNumber { get; set; } = string.Empty;
+	private RadzenMask maskedTextBox;
+
+	// Combined full number
+	private string FullNumber => $"+998{RawNumber(phoneNumber)}";
+
+
+	private async Task CallNumber()
+	{
+		// Put your "call" logic here, then close or keep open as needed
+		CallService.StartCall(FullNumber);
+		DialogService.Close(true);
+
+		// await DialogService.OpenSideAsync<CallWindow>(
+		// 	title: "",
+		// 	parameters: new Dictionary<string, object>()
+		// 			{
+		// 		// Pass any data you want as parameters here
+		// 		{ "PhoneNumber", FullNumber }
+		// 			},
+		// 	options: new SideDialogOptions
+		// 		{
+		// 			Position = DialogPosition.Top,
+		// 			ShowClose = false,
+		// 			ShowTitle = false,
+		// 			ShowMask = true,
+		// 			CssClass = "custom-dialog-theme rz-background-color-info"
+		// 		}
+		// );
+
+	}
+
+	// This method enables to change mask value by buttons.
+	private async Task HandleKeyUp(KeyboardEventArgs args)
+	{
+		// Use JS interop to get the actual value from the underlying input element.
+		// Make sure that the Radzen component exposes an Element property.
+		phoneNumber = await JS.InvokeAsync<string>("getInputValue", maskedTextBox.Element);
+		// Force a UI update.
+		StateHasChanged();
+	}
+
+	// This method enables to call by pressing Enter key.
+	private async Task HandleKeyDown(KeyboardEventArgs e)
+	{
+		if (!string.IsNullOrEmpty(phoneNumber) && e.Key == "Enter" && phoneNumber.Length >= 12)
+		{
+			CallNumber();
+		}
+	}
+
+	// Converts "12-345-67-89" → "123456789"
+	private string RawNumber(string input)
+	{
+		return Regex.Replace(input, @"[^0-9]", "");
+	}
+
+	void AddDigit(string digit)
+	{
+		phoneNumber += digit;
+
+		// Remove all non-numeric characters
+		string output = RawNumber(phoneNumber);
+
+		// Reapply mask formatting
+		phoneNumber = ApplyPhoneMask(output);
+	}
+
+	private void HandleBackspace()
+	{
+		@if (!string.IsNullOrEmpty(phoneNumber))
+		{
+			// Remove last character while preserving mask format
+			var digits = RawNumber(phoneNumber);
+			if (digits.Length > 0)
+			{
+				// Remove last digit
+				var newDigits = new string(digits.Take(digits.Length - 1).ToArray());
+
+				// Reapply mask formatting
+				phoneNumber = ApplyPhoneMask(newDigits);
+			}
+		}
+	}
+
+	private string ApplyPhoneMask(string digits)
+	{
+		if (string.IsNullOrEmpty(digits)) return "";
+
+		var mask = "**-***-**-**";
+		var result = new StringBuilder();
+		int digitIndex = 0;
+
+		foreach (var c in mask)
+		{
+			if (digitIndex >= digits.Length) break;
+
+			if (c == '*')
+			{
+				result.Append(digits[digitIndex]);
+				digitIndex++;
+			}
+			else
+			{
+				result.Append(c);
+			}
+		}
+
+		return result.ToString();
+	}
+
+}
+
+<script>
+	// A simple JavaScript function to return the current value of an input element.
+	window.getInputValue = function (element) {
+		return element ? element.value : '';
+	};
+</script>
+
+<style>
+	/* /* Hide footer */
+	::deep .rz-dialog-footer {
+		display: none !important;
+	}
+
+	/* Optional: Adjust content area */
+	::deep .rz-dialog-content {
+		padding-bottom: 0 !important;
+	} */
+</style>

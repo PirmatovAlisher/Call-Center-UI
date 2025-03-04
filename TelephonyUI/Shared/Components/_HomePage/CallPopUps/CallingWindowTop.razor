@@ -1,0 +1,54 @@
+﻿@* CallWindow.razor *@
+@inject CallService CallService
+@implements IDisposable
+
+
+<div class="call-window rz-background-color-base-100 rz-shadow-6">
+	<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" class="rz-px-5" Style="height: 70px;">
+
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="8px">
+			<RadzenCard Variant="Variant.Flat" class="rz-background-color-success rz-p-2 rz-border-radius-10" Style="height: 40px;">
+				<RadzenIcon Icon="phone_in_talk" IconStyle="IconStyle.Base" />
+			</RadzenCard>
+			<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" class="rz-background-color-info-light rz-p-2 rz-border-radius-6" Style="height: 40px;">
+				<RadzenText TextStyle="TextStyle.H6" Style="margin-bottom: 0px; color:white; font-weight: 500;">
+					<strong>Calling</strong> @CallService.CurrentNumber - @CallService.CallDuration.ToString(@"hh\:mm\:ss")
+				</RadzenText>
+			</RadzenStack>
+		</RadzenStack>
+
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="10px">
+			<RadzenButton Click="@EndCall"
+						  Icon="add" Text="Create Account" ButtonStyle="ButtonStyle.Info" Shade="Shade.Light" class="rz-border-radius-6 no-uppercase" />
+			<RadzenButton Click="@EndCall"
+						  Icon="sms" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Dark" class="rz-border-radius-10 no-uppercase" />
+			<RadzenButton Click="@EndCall"
+						  Icon="mic" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Dark" class="rz-border-radius-10 no-uppercase" />
+			<RadzenButton Click="@EndCall"
+						  Icon="add_call" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Dark" class="rz-border-radius-10 no-uppercase" />
+			<RadzenButton Click="@EndCall"
+						  Icon="dialpad" Text="Dialpad" ButtonStyle="ButtonStyle.Base" Variant="Variant.Flat" Shade="Shade.Dark" class="rz-border-radius-6 no-uppercase" />
+			<RadzenButton Click="@EndCall"
+						  Icon="pause" Text="Hold" ButtonStyle="ButtonStyle.Info" Shade="Shade.Light" class="rz-border-radius-6 no-uppercase" />
+			<RadzenButton Click="@EndCall"
+						  Icon="call_end" Text="End Call" ButtonStyle="ButtonStyle.Danger" Shade="Shade.Light" class="rz-border-radius-6 no-uppercase" />
+		</RadzenStack>
+
+	</RadzenStack>
+</div>
+@code {
+	protected override void OnInitialized()
+	{
+		CallService.OnCallStateChanged += StateHasChanged;
+	}
+
+	private void EndCall()
+	{
+		CallService.EndCall();
+	}
+
+	public void Dispose()
+	{
+		CallService.OnCallStateChanged -= StateHasChanged;
+	}
+}

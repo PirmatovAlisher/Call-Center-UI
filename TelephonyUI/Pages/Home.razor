@@ -9,7 +9,7 @@
 		<RadzenTabsItem Text="Call">
 			<RadzenRow>
 				<RadzenColumn Size="12" SizeLG="8" class="rz-p-5">
-					<HomeCallHistoryComponent Products="@products" />
+					<HomeCallHistoryComponent />
 				</RadzenColumn>
 				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5 rz-shadow-6">
 					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
@@ -21,9 +21,8 @@
 		</RadzenTabsItem>
 		<RadzenTabsItem Text="SMS">
 			<RadzenRow>
-				<RadzenColumn Size="12" SizeLG="8">
-					@* <HomeSMSComponent Contacts="@Contacts" /> *@
-					<MessagingLayout Contacts="@Contacts" />
+				<RadzenColumn Size="12" SizeLG="8" class="rz-p-5">
+					<HomeSMSComponent Contacts="@Contacts" />
 				</RadzenColumn>
 				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5 rz-shadow-6">
 					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
@@ -35,37 +34,10 @@
 		</RadzenTabsItem>
 		<RadzenTabsItem Text="Email">
 			<RadzenRow>
-				<RadzenColumn Size="12" SizeLG="8" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
-					@* <HomeEmailComponent /> *@
-					<HomeSMSComponent Contacts="@Contacts" />
-				</RadzenColumn>
-				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
-					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
-					<P>
-						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
-					</P>
-				</RadzenColumn>
-			</RadzenRow>
-		</RadzenTabsItem>
-		<RadzenTabsItem Text="Test">
-			<RadzenRow>
-				<RadzenColumn Size="12" SizeLG="8">
-					<Test />
-				</RadzenColumn>
-				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
-					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
-					<P>
-						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
-					</P>
-				</RadzenColumn>
-			</RadzenRow>
-		</RadzenTabsItem>
-		<RadzenTabsItem Text="NewSMS">
-			<RadzenRow>
 				<RadzenColumn Size="12" SizeLG="8" class="rz-p-5">
-					<NewSMS Contacts="@Contacts" />
+					<HomeEmailComponent />
 				</RadzenColumn>
-				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5">
+				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5 rz-shadow-6">
 					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
 					<P>
 						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
@@ -117,7 +89,11 @@
 			{
 				Name = "Jane Smith",
 				Email = "janesmith@gmail.com",
-				Messages = new List<Message>()
+				Messages = new List<Message>
+				{
+					new Message { Content = "Hello!", IsUserMessage = false, Timestamp = DateTime.Now.AddDays(-5).AddMinutes(-5) },
+					new Message { Content = "Hi there!", IsUserMessage = true, Timestamp = DateTime.Now.AddDays(-5).AddMinutes(-4) }
+				}
 			},
 			new Contact
 			{
