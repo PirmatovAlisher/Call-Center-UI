@@ -1,0 +1,188 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div @ref="containerRef" style="width: 100%; height: 100%;">
+	@if (isDesktopLayout)
+	{
+		<RadzenRow Gap="0" Style="height: 100%;">
+			<RadzenColumn Size="3" class="rz-border-right" Style="height: 100%; padding: 0; display: flex; flex-direction: column;">
+				<div class="rz-p-4" style="flex: 0 0 auto; min-height: 0;">
+					<CustomerHeaderComponent @bind-SearchTerm="SearchTerm" @bind-SelectedType="SelectedType"
+											 IsDesktopLayout="isDesktopLayout" TotalCustomers="filteredCustomers.Count()" />
+				</div>
+				<div class="rz-border-top" style="flex: 1 1 auto;  min-height: 0; overflow-y: auto;">
+					<CustomerListComponent Customers="filteredCustomers"
+										   OnCustomerSelected="SelectCustomer"
+										   SelectedCustomer="selectedCustomer" />
+				</div>
+			</RadzenColumn>
+			<RadzenColumn Size="9" Style="height: 100%; padding: 0;">
+				@if (selectedCustomer != null)
+				{
+
+					<CustomerViewComponent Customer="selectedCustomer"
+										   ShowBackButton="true"
+										   OnBack="DeselectCustomer" />
+
+				}
+				else
+				{
+					<div class="empty-state">
+						<RadzenIcon Icon="info" Style="font-size: 2rem; color: #666;" />
+						<p>Select a customer to view details</p>
+					</div>
+				}
+			</RadzenColumn>
+		</RadzenRow>
+	}
+	else
+	{
+		@if (selectedCustomer == null)
+		{
+			<div style="height: 100%; padding: 0; display: flex; flex-direction: column;">
+
+				<div class="rz-p-4 " style="flex: 0 0 auto; min-height: 0;">
+					<CustomerHeaderComponent @bind-SearchTerm="SearchTerm" @bind-SelectedType="SelectedType"
+											 IsDesktopLayout="isDesktopLayout" TotalCustomers="filteredCustomers.Count()" />
+				</div>
+				<div class="rz-border-top" style="flex: 1 1 auto; min-height: 0; overflow-y: auto;">
+					<CustomerListComponent Customers="filteredCustomers"
+										   OnCustomerSelected="SelectCustomer"
+										   SelectedCustomer="selectedCustomer" />
+				</div>
+			</div>
+		}
+		else
+		{
+			<CustomerViewComponent Customer="selectedCustomer"
+								   ShowBackButton="true"
+								   OnBack="DeselectCustomer" />
+
+		}
+	}
+</div>
+
+@code
+{
+	private List<Customer> filteredCustomers = new();
+	private string searchTerm;
+	public string SearchTerm
+	{
+		get => searchTerm;
+		set
+		{
+			searchTerm = value;
+			FilterCustomers();
+		}
+	}
+
+	private CustomerType? selectedType;
+	public CustomerType? SelectedType
+	{
+		get => selectedType;
+		set
+		{
+			selectedType = value;
+			FilterCustomers();
+		}
+	}
+
+	private void FilterCustomers()
+	{
+		filteredCustomers = customers
+			.Where(c => selectedType == null || c.Type == selectedType)
+			.Where(c => string.IsNullOrEmpty(searchTerm) ||
+						c.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+						c.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+						c.AccountNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+						c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+			.ToList();
+		StateHasChanged(); // Refresh the UI
+	}
+}
+
+@code {
+	private ElementReference containerRef;
+	private bool isDesktopLayout;
+	private int containerWidth;
+	private List<Customer> customers = new();
+	private Customer selectedCustomer = null;
+	private DotNetObjectReference<CustomerComponent> objRef;
+
+	protected override async Task OnInitializedAsync()
+	{
+		customers = SeedDataProvider.Customers;
+		FilterCustomers(); // Initialize the filtered list
+		objRef = DotNetObjectReference.Create(this);
+	}
+
+	private void SelectCustomer(Customer customer)
+	{
+		selectedCustomer = customer;
+	}
+
+	private void DeselectCustomer()
+	{
+		selectedCustomer = null;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await Task.Delay(100); // Wait 100ms for layout to settle
+			await UpdateLayout();
+			await JSRuntime.InvokeVoidAsync("addResizeListener", objRef);
+		}
+	}
+
+	private async Task UpdateLayout()
+	{
+		try
+		{
+			containerWidth = await JSRuntime.InvokeAsync<int>("getElementWidth", containerRef);
+			isDesktopLayout = containerWidth >= 768;
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error updating layout: {ex.Message}");
+		}
+	}
+
+	[JSInvokable]
+	public async Task OnWindowResize()
+	{
+		await UpdateLayout();
+	}
+
+
+
+	public void Dispose()
+	{
+		objRef?.Dispose();
+	}
+}
+
+
+<script>
+	window.getElementWidth = (element) => {
+		return element.clientWidth;
+	};
+
+	window.addResizeListener = (dotNetObj) => {
+		window.addEventListener('resize', () => {
+			dotNetObj.invokeMethodAsync('OnWindowResize');
+		});
+	};
+</script>
+
+<style>
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		color: #666;
+	}
+</style>

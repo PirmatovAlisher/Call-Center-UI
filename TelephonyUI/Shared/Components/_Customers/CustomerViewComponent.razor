@@ -1,0 +1,281 @@
+﻿@inject CallService CallService
+
+<RadzenCard Variant="Variant.Flat" class="customer-view" Style="height: 100%; padding: 0 !important;">
+	<div class="customer-view">
+		<div class="top rz-p-3">
+			<RadzenStack Orientation="Orientation.Vertical" Gap="10px">
+				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+					@if (ShowBackButton)
+					{
+						<RadzenButton Text="Back" Click="@(() => OnBack.InvokeAsync())" Variant="Variant.Text" ButtonStyle="ButtonStyle.Info" Icon="arrow_back" />
+					}
+					<RadzenButton Text="Edit" Variant="Variant.Text" ButtonStyle="ButtonStyle.Info" Icon="edit_square" />
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+					<RadzenStack Orientation="Orientation.Vertical">
+						<h3>@Customer.FirstName @Customer.LastName</h3>
+						<RadzenStack Orientation="Orientation.Horizontal">
+							@if (Customer != null)
+							{
+								switch (Customer.Type)
+								{
+									case CustomerType.VIP:
+										<RadzenBadge Text="@Customer.Type.ToString()" BadgeStyle="BadgeStyle.Primary" Shade="Shade.Lighter" class="no-uppercase" />
+										break;
+									case CustomerType.New:
+										<RadzenBadge Text="@Customer.Type.ToString()" BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" class="no-uppercase" />
+										break;
+									case CustomerType.Prospect:
+										<RadzenBadge Text="@Customer.Type.ToString()" BadgeStyle="BadgeStyle.Light" Shade="Shade.Lighter" class="no-uppercase" />
+										break;
+									case CustomerType.Lead:
+										<RadzenBadge Text="@Customer.Type.ToString()" BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" class="no-uppercase" />
+										break;
+									case CustomerType.Existing:
+										<RadzenBadge Text="@Customer.Type.ToString()" BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="no-uppercase" />
+										break;
+									default:
+										<RadzenBadge Text="No Information" BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" class="no-uppercase" />
+										break;
+								}
+							}
+							else
+							{
+								<RadzenBadge Text="No Information" BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" class="no-uppercase" />
+							}
+						</RadzenStack>
+					</RadzenStack>
+					<RadzenStack Orientation="Orientation.Horizontal" Gap="15px">
+						<RadzenButton Icon="call" Click="@(() => CallService.StartCall(Customer.PhoneNumber))" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Size="ButtonSize.Large" class="rz-border-radius-6 no-uppercase" />
+						<RadzenButton Icon="forum" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Size="ButtonSize.Large" class="rz-border-radius-6 no-uppercase" />
+						<RadzenButton Icon="mail" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" Size="ButtonSize.Large" class="rz-border-radius-6 no-uppercase" />
+					</RadzenStack>
+				</RadzenStack>
+
+			</RadzenStack>
+		</div>
+		<div class="middle rz-p-3">
+			<RadzenTabs RenderMode="TabRenderMode.Client" @bind-SelectedIndex=@selectedIndex class="no-uppercase-tabs">
+				<Tabs>
+					<RadzenTabsItem Text="Details">
+						<h4 class="rz-mt-3">Personal Information</h4>
+						<RadzenStack Orientation="Orientation.Vertical" Gap="20px">
+							<RadzenRow>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>First Name:</strong></p>
+										<p>@Customer.FirstName</p>
+									</RadzenStack>
+								</RadzenColumn>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Middle Name:</strong></p>
+										<p>--</p>
+									</RadzenStack>
+								</RadzenColumn>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Middle Name:</strong></p>
+										<p>@Customer.LastName</p>
+									</RadzenStack>
+								</RadzenColumn>
+							</RadzenRow>
+							<RadzenRow>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Phone Number:</strong></p>
+										<p>@Customer.PhoneNumber</p>
+									</RadzenStack>
+								</RadzenColumn>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Secondary Number:</strong></p>
+										<p>--</p>
+									</RadzenStack>
+								</RadzenColumn>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Email:</strong></p>
+										<p>@Customer.Email</p>
+									</RadzenStack>
+								</RadzenColumn>
+							</RadzenRow>
+							<RadzenRow>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Account Number:</strong></p>
+										<p>@Customer.AccountNumber</p>
+									</RadzenStack>
+								</RadzenColumn>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Account Type::</strong></p>
+										<p>@Customer.Type</p>
+									</RadzenStack>
+								</RadzenColumn>
+								<RadzenColumn>
+									<RadzenStack Orientation="Orientation.Vertical" Gap="5px">
+										<p><strong>Created At:</strong></p>
+										<p>@Customer.CreatedDate.ToShortDateString()</p>
+									</RadzenStack>
+								</RadzenColumn>
+							</RadzenRow>
+							<RadzenRow>
+								<h5>Notes</h5>
+								<RadzenCard Variant="Variant.Outlined" class="rz-background-color-secondary-lighter rz-border-radius-4" Style="height: 150px; width: 100%;">
+									<p>Something is written here.</p>
+								</RadzenCard>
+							</RadzenRow>
+						</RadzenStack>
+					</RadzenTabsItem>
+					<RadzenTabsItem Text="History">
+						@if (Customer.Interactions.Any())
+						{
+							<RadzenTimeline AlignItems="AlignItems.Start" LinePosition="LinePosition.Start">
+								<Items>
+									@foreach (var interaction in Customer.Interactions)
+									{
+										<RadzenTimelineItem PointSize="PointSize.Large" PointStyle="@GetPointStyle(interaction.Type)" PointVariant="Variant.Outlined" PointShadow="0">
+											<PointContent>
+												@switch (interaction.Type)
+												{
+													case InteractionType.Call:
+														<RadzenIcon Icon="call" />
+														break;
+													case InteractionType.Callback:
+														<RadzenIcon Icon="phone_callback" />
+														break;
+													case InteractionType.Email:
+														<RadzenIcon Icon="mail" />
+														break;
+													case InteractionType.Chat:
+														<RadzenIcon Icon="forum" />
+														break;
+													default:
+														<RadzenIcon Icon="layers" />
+														break;
+												}
+											</PointContent>
+											<ChildContent>
+												<RadzenCard Variant="Variant.Outlined" class="rz-background-color-info-lighter rz-border-radius-4">
+													<RadzenStack Orientation="Orientation.Vertical" Gap="10px">
+														<RadzenStack Orientation="Orientation.Horizontal">
+															<RadzenText TextStyle="TextStyle.Subtitle1" class="rz-m-0">@interaction.Type.ToString():</RadzenText>
+															<RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">@interaction.InteractionDate.ToString("MM/yy-HH:mm")</RadzenText>
+														</RadzenStack>
+														<RadzenStack Orientation="Orientation.Horizontal">
+															@switch (interaction.Type)
+															{
+																case InteractionType.Call:
+																	<RadzenIcon Icon="call" />
+																	break;
+																case InteractionType.Callback:
+																	<RadzenIcon Icon="phone_callback" />
+																	break;
+																case InteractionType.Email:
+																	<RadzenIcon Icon="mail" />
+																	break;
+																case InteractionType.Chat:
+																	<RadzenIcon Icon="forum" />
+																	break;
+																default:
+																	<RadzenIcon Icon="layers" />
+																	break;
+															}
+															<RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">@interaction.Summary</RadzenText>
+														</RadzenStack>
+														<RadzenStack Orientation="Orientation.Horizontal">
+															<RadzenIcon Icon="headset_mic" />
+															@if (interaction.Agent != null)
+															{
+																<RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">@interaction.Agent.FirstName @interaction.Agent.LastName</RadzenText>
+															}
+															else
+															{
+																<RadzenText TextStyle="TextStyle.Body2" class="rz-m-0">--</RadzenText>
+															}
+														</RadzenStack>
+													</RadzenStack>
+												</RadzenCard>
+											</ChildContent>
+										</RadzenTimelineItem>
+									}
+								</Items>
+							</RadzenTimeline>
+						}
+					</RadzenTabsItem>
+					<RadzenTabsItem Text="Coverage">
+
+					</RadzenTabsItem>
+				</Tabs>
+			</RadzenTabs>
+		</div>
+		<div class="bottom rz-border-top rz-p-3">
+			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+
+				<RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined" Icon="delete" />
+
+				<RadzenButton Text="Begin Signing" ButtonStyle="ButtonStyle.Info" />
+			</RadzenStack>
+		</div>
+
+	</div>
+</RadzenCard>
+
+
+
+@code {
+	[Parameter] public Customer Customer { get; set; }
+	[Parameter] public bool ShowBackButton { get; set; } = false;
+	[Parameter] public EventCallback OnBack { get; set; }
+
+	int selectedIndex = 0;
+
+	protected override async Task OnInitializedAsync()
+	{
+		Customer.Interactions = SeedDataProvider.Interactions.Where(x => x.CustomerId == Customer.Id).ToList();
+		foreach (var interaction in Customer.Interactions)
+		{
+			var agent = SeedDataProvider.Agents.FirstOrDefault(a => a.Id == interaction.AgentId);
+			if (agent != null)
+			{
+				interaction.Agent = agent;
+			}
+		}
+	}
+
+	// Helper method to map InteractionType to a PointStyle
+	private PointStyle GetPointStyle(InteractionType type)
+	{
+		return type switch
+		{
+			InteractionType.Call => PointStyle.Warning,
+			InteractionType.Email => PointStyle.Info,
+			InteractionType.Chat => PointStyle.Success,
+			InteractionType.Callback => PointStyle.Danger,
+			_ => PointStyle.Success,
+		};
+	}
+}
+
+<style>
+
+	.customer-view {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	/* Top and bottom take their natural height */
+	.top, .bottom {
+		flex: 0 0 auto;
+	}
+
+	/* Middle fills the remaining space and is scrollable */
+	.middle {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		min-height: 0; /* Ensure it can shrink as needed */
+	}
+
+</style>

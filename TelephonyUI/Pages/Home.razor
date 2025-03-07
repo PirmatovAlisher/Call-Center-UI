@@ -7,15 +7,15 @@
 <RadzenTabs RenderMode="TabRenderMode.Client" @bind-SelectedIndex=@selectedIndex class="no-uppercase-tabs">
 	<Tabs>
 		<RadzenTabsItem Text="Call">
-			<RadzenRow>
-				<RadzenColumn Size="12" SizeLG="8" class="rz-p-5">
+			<RadzenRow Gap="15px">
+				<RadzenColumn Size="12" SizeLG="8" class="rz-py-5">
 					<HomeCallHistoryComponent />
 				</RadzenColumn>
-				<RadzenColumn Size="12" SizeLG="4" class="rz-background-color-info-lighter rz-color-on-info-lighter rz-p-5 rz-shadow-6">
-					<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
-					<P>
-						This is the content for the smaller column. It will occupy 4/12ths of the row on medium and larger screens, and the full 12/12ths on small screens.
-					</P>
+				<RadzenColumn Size="12" SizeLG="4" class="rz-py-5">
+					<RadzenCard Variant="Variant.Filled" Style="height:670px; padding: 0 !important" class="rz-display-flex rz-shadow-6">
+						@* <AccountComponent /> *@
+						<TelephonyUI.Shared.Components._Customers.CustomerComponent/>
+					</RadzenCard>
 				</RadzenColumn>
 			</RadzenRow>
 		</RadzenTabsItem>

@@ -1,0 +1,157 @@
+﻿
+
+
+<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Normal" AlignItems="AlignItems.Normal" Gap="1px">
+
+	<div class="rz-display-flex justify-content-between rz-mx-3 rz-mt-3">
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start">
+			<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
+		</RadzenStack>
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+			<RadzenButton Icon="add" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Medium" class="rz-border-radius-10 rz-shadow-6" />
+		</RadzenStack>
+	</div>
+
+	<RadzenText TextStyle="TextStyle.Subtitle2" class="rz-ml-3">120 Total</RadzenText>
+
+	<!-- Search Box -->
+	<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+		<RadzenTextBox @bind-Value="@searchTerm"
+					   Placeholder="Search..."
+					   Style="min-width: 280px;"
+					   Change="@(() => OnSearch())" />
+	</RadzenStack>
+
+	<!-- Filter Presets -->
+	<div class="rz-m-3" style="display: flex; flex-wrap: wrap; width: 270px; gap: 10px;">
+		<RadzenButton Text="All"
+					  Click="@(() => { activeFilter = null ; ApplyFilters(); })"
+					  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+					  class="@(activeFilter == null ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+
+		<RadzenButton Text="New"
+					  Click="@(() => { activeFilter = CustomerType.New ; ApplyFilters(); })"
+					  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+					  class="@(activeFilter == CustomerType.New ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+
+		<RadzenButton Text="Lead"
+					  Click="@(() => { activeFilter = CustomerType.Lead ; ApplyFilters(); })"
+					  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+					  class="@(activeFilter == CustomerType.Lead ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+
+		<RadzenButton Text="Prospect"
+					  Click="@(() => { activeFilter = CustomerType.Prospect ; ApplyFilters(); })"
+					  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+					  class="@(activeFilter == CustomerType.Prospect ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+		<RadzenButton Text="VIP"
+					  Click="@(() => { activeFilter = CustomerType.VIP ; ApplyFilters(); })"
+					  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+					  class="@(activeFilter == CustomerType.VIP ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+	</div>
+	<div class="rz-border-bottom" />
+	<RadzenListBox TValue="Customer"
+				   Data="@Customers"
+				   Value="SelectedCustomer"
+				   ValueChanged="@(async (Customer c) => await OnCustomerSelected(c))"
+				   Style="min-width: 300px; flex: 1; overflow-y: auto;">
+
+		<Template Context="customer">
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Normal" Gap="3px">
+				<!-- Gravatar -->
+				<RadzenGravatar Text="@customer.FirstName" Size="36" Style="margin-right: 15px;" />
+				<div class="rz-p-3">
+					<div>@customer.FirstName @customer.LastName</div>
+					<div class="text-small">@customer.AccountNumber</div>
+				</div>
+			</RadzenStack>
+		</Template>
+	</RadzenListBox>
+</RadzenStack>
+
+
+@code {
+	[Parameter]
+	public List<Customer> Customers { get; set; } = new();
+
+	[Parameter]
+	public Customer SelectedCustomer { get; set; }
+
+	[Parameter]
+	public EventCallback<Customer> SelectedCustomerChanged { get; set; }
+
+	private async Task SelectCustomer(Customer customer)
+	{
+		SelectedCustomer = customer;
+		await SelectedCustomerChanged.InvokeAsync(customer);
+	}
+
+	// Add this to handle null values
+	private async Task OnCustomerSelected(Customer customer)
+	{
+		SelectedCustomer = customer;
+		await SelectedCustomerChanged.InvokeAsync(customer);
+	}
+
+}
+
+
+@code
+{
+	IEnumerable<Call> FilteredCalls = new List<Call>();
+
+	private CustomerType? activeFilter { get; set; } = null;
+	private string searchTerm = "";
+
+	private bool isLoading = false; // Controls loading visibility
+
+	async Task OnSearch()
+	{
+		searchTerm = searchTerm?.Trim().ToLower()!;
+		await ApplyFilters();
+	}
+
+	private async Task ApplyFilters()
+	{
+		isLoading = true; // Show loading
+		StateHasChanged(); // Force UI update
+									// Simulate async operation (replace with real data fetching)
+		await Task.Delay(500);
+
+		var query = SeedDataProvider.Calls.AsEnumerable();
+
+		// Apply preset filter
+		if (activeFilter.HasValue)
+		{
+			query = SeedDataProvider.Calls.Where(x => x.Customer != null && x.Customer?.Type == activeFilter);
+		}
+
+		// Apply search filter
+		if (!string.IsNullOrEmpty(searchTerm))
+		{
+			query = query.Where(c =>
+								(c.Agent?.FirstName?.ToLower().Contains(searchTerm)) == true ||
+								(c.Agent?.LastName?.ToLower().Contains(searchTerm)) == true ||
+								(c.Agent?.Extension?.Contains(searchTerm) == true) ||
+								(c.Customer?.FirstName?.ToLower().Contains(searchTerm) == true) ||
+								(c.Customer?.LastName?.ToLower().Contains(searchTerm) == true) ||
+								(c.Customer?.PhoneNumber.Contains(searchTerm) == true) ||
+								(c.Customer?.AccountNumber.ToLower().Contains(searchTerm) == true) ||
+								(c.CallerNumber?.Contains(searchTerm) == true)
+			);
+		}
+
+		FilteredCalls = query.ToList();
+		isLoading = false; // Hide loading
+		StateHasChanged();
+	}
+
+	MarkupString HighlightMatch(string text)
+	{
+		if (string.IsNullOrEmpty(searchTerm) || string.IsNullOrEmpty(text))
+			return (MarkupString)text;
+
+		return (MarkupString)text.Replace(searchTerm,
+									$"<strong class=\"rz-background-color-warning-dark\">{searchTerm}</strong>",
+									StringComparison.OrdinalIgnoreCase);
+	}
+}

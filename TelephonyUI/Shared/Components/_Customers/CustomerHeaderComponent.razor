@@ -1,0 +1,77 @@
+﻿<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Normal" AlignItems="AlignItems.Normal" Gap="15px">
+
+	<RadzenStack Orientation="Orientation.Vertical" Gap="0px">
+		<div class="rz-display-flex justify-content-between ">
+			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start">
+				<RadzenText TextStyle="TextStyle.DisplayH5"><stong>Accounts</stong></RadzenText>
+			</RadzenStack>
+			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+				<RadzenButton Icon="add" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Medium" class="rz-border-radius-10 rz-shadow-6" />
+			</RadzenStack>
+		</div>
+		<RadzenText TextStyle="TextStyle.Subtitle2">@TotalCustomers Total</RadzenText>
+	</RadzenStack>
+
+	<!-- Search Box -->
+	<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+		<RadzenTextBox @bind-Value="@SearchTerm"
+					   @oninput="@((e) => UpdateSearchTerm(e.Value.ToString()))"
+					   Placeholder="Search..."
+					   Style="width: 100%;" />
+	</RadzenStack>
+
+	<!-- Filter Presets -->
+	<RadzenRow Style="flex-direction: row; flex-wrap: wrap;" Gap="10px">
+		@foreach (var option in customerTypes)
+		{
+			<RadzenButton Text="@option.Name"
+						  Click="@(() => SetSelectedType(option.Value))"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+						  class="@(SelectedType == option.Value ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+		}
+
+	</RadzenRow>
+
+</RadzenStack>
+
+
+@code
+{
+	[Parameter] public string SearchTerm { get; set; }
+	[Parameter] public EventCallback<string> SearchTermChanged { get; set; }
+
+	[Parameter] public CustomerType? SelectedType { get; set; }
+	[Parameter] public EventCallback<CustomerType?> SelectedTypeChanged { get; set; }
+
+	[Parameter] public bool IsDesktopLayout { get; set; }
+	[Parameter] public int TotalCustomers { get; set; }
+
+	private List<FilterOption> customerTypes = new List<FilterOption>()
+	{
+		new FilterOption { Name = "All", Value = null },
+		new FilterOption { Name = "New", Value = CustomerType.New },
+		new FilterOption { Name = "Existing", Value = CustomerType.Existing },
+		new FilterOption { Name = "VIP", Value = CustomerType.VIP },
+		new FilterOption { Name = "Prospect", Value = CustomerType.Prospect },
+		new FilterOption { Name = "Lead", Value = CustomerType.Lead }
+	};
+
+	private async Task SetSelectedType(CustomerType? type)
+	{
+		SelectedType = type;
+		await SelectedTypeChanged.InvokeAsync(type);
+	}
+
+	private async Task UpdateSearchTerm(string value)
+	{
+		SearchTerm = value;
+		await SearchTermChanged.InvokeAsync(value); // Notify parent component if applicable
+	}
+
+	public class FilterOption
+	{
+		public string Name { get; set; }
+		public CustomerType? Value { get; set; }
+	}
+}
+

@@ -1,0 +1,93 @@
+﻿@* <div style="height: 100%; overflow-y: auto;">
+	@foreach (var customer in Customers)
+	{
+		<div @onclick="() => OnCustomerSelected.InvokeAsync(customer)" class="customer-item">
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Normal" Gap="3px">
+				<!-- Gravatar -->
+				<RadzenGravatar Text="@customer.FirstName" Size="36" Style="margin-right: 15px;" />
+				<div class="rz-p-3">
+					<div>@customer.FirstName @customer.LastName</div>
+					<div class="text-small">@customer.AccountNumber</div>
+				</div>
+			</RadzenStack>
+		</div>
+	}
+</div> *@
+<RadzenListBox TValue="Customer"
+			   Data="@Customers"
+			   Value="SelectedCustomer"
+			   ValueChanged="@(async (Customer c) => await OnCustomerSelected.InvokeAsync(c))"
+			   class="borderless-listbox"
+			   Style="padding: 0; display: flex; flex-direction: column; overflow-y: auto;">
+
+	<Template Context="customer">
+		<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Normal" JustifyContent="JustifyContent.SpaceBetween" Gap="3px">
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+				<!-- Gravatar -->
+				<RadzenGravatar Text="@customer.FirstName" Size="36" Style="margin-right: 15px;" />
+				<RadzenStack Orientation="Orientation.Vertical">
+					<div><strong>@customer.FirstName @customer.LastName</strong></div>
+					<p>Last Contact: @customer.LastContactDate.ToShortDateString()</p>
+				</RadzenStack>
+			</RadzenStack>
+			<RadzenStack Orientation="Orientation.Vertical">
+				<RadzenText TextStyle="TextStyle.Caption">@customer.AccountNumber</RadzenText>
+				@if (customer != null)
+				{
+					switch (customer.Type)
+					{
+						case CustomerType.VIP:
+							<RadzenBadge Text="@customer.Type.ToString()" BadgeStyle="BadgeStyle.Primary" Shade="Shade.Lighter" class="no-uppercase" />
+							break;
+						case CustomerType.New:
+							<RadzenBadge Text="@customer.Type.ToString()" BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" class="no-uppercase" />
+							break;
+						case CustomerType.Prospect:
+							<RadzenBadge Text="@customer.Type.ToString()" BadgeStyle="BadgeStyle.Light" Shade="Shade.Lighter" class="no-uppercase" />
+							break;
+						case CustomerType.Lead:
+							<RadzenBadge Text="@customer.Type.ToString()" BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" class="no-uppercase" />
+							break;
+						case CustomerType.Existing:
+							<RadzenBadge Text="@customer.Type.ToString()" BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="no-uppercase" />
+							break;
+						default:
+							<RadzenBadge Text="No Information" BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" class="no-uppercase" />
+							break;
+					}
+				}
+				else
+				{
+					<RadzenBadge Text="No Information" BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" class="no-uppercase" />
+				}
+			</RadzenStack>
+
+		</RadzenStack>
+	</Template>
+</RadzenListBox>
+
+
+
+
+
+@code {
+	[Parameter] public List<Customer> Customers { get; set; }
+	[Parameter] public Customer? SelectedCustomer { get; set; }
+	[Parameter] public EventCallback<Customer> OnCustomerSelected { get; set; }
+
+
+	private string GetItemClass(Customer customer)
+	{
+		return customer == SelectedCustomer ? "customer-item rz-state-highlight" : "customer-item";
+	}
+}
+
+<style>
+	.borderless-listbox,
+	.borderless-listbox:focus,
+	.borderless-listbox:hover {
+		border: none !important;
+		box-shadow: none !important;
+	}
+
+</style>
