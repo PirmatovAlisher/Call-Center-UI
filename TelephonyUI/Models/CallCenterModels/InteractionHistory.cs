@@ -1,4 +1,5 @@
 ﻿using TelephonyUI.Models.CallCenterEnums;
+using static TelephonyUI.Pages.Home;
 
 namespace TelephonyUI.Models.CallCenterModels
 {
@@ -13,5 +14,9 @@ namespace TelephonyUI.Models.CallCenterModels
 		public int? RelatedCallId { get; set; }
 		public string AgentId { get; set; }
 		public Agent Agent { get; set; }
+
+		public ChatStatus Status { get; set; } = ChatStatus.Active;
+		public List<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
+		public ChatMessage LastMessage => Messages.LastOrDefault();
 	}
 }

@@ -10,6 +10,7 @@ namespace TelephonyUI.Models
 		public static List<Call> Calls { get; } = new List<Call>();
 		public static List<InteractionHistory> Interactions { get; } = new List<InteractionHistory>();
 		public static List<CallRecording> CallRecordings { get; } = new List<CallRecording>();
+		public static List<ChatMessage> ChatMessages { get; } = new List<ChatMessage>();
 
 		static SeedDataProvider()
 		{
@@ -20,6 +21,8 @@ namespace TelephonyUI.Models
 			InitializeCallRecordings();
 			LinkRelationships();
 		}
+
+
 
 		private static void InitializeAgents()
 		{
@@ -2320,6 +2323,40 @@ namespace TelephonyUI.Models
 };
 
 			Interactions.AddRange(interactions);
+
+			var chatInteraction = new InteractionHistory
+			{
+				Id = 3,
+				CustomerId = 1,
+				InteractionDate = DateTime.Now.AddHours(-1),
+				Type = InteractionType.Chat,
+				Summary = "Technical support chat session",
+				AgentId = "agent-1",
+				Status = ChatStatus.Ended,
+				Messages = new List<ChatMessage>()
+			};
+
+			ChatMessages.AddRange(new[]
+			{
+			new ChatMessage
+			{
+				Id = 1,
+				InteractionHistoryId = 3,
+				Content = "Hello, I'm having issues with my account",
+				Timestamp = DateTime.Now.AddHours(-1).AddMinutes(5),
+				IsCustomerMessage = true
+			},
+			new ChatMessage
+			{
+				Id = 2,
+				InteractionHistoryId = 3,
+				Content = "Let me help you with that",
+				Timestamp = DateTime.Now.AddHours(-1).AddMinutes(6),
+				IsCustomerMessage = false
+			}
+		});
+
+			Interactions.Add(chatInteraction);
 		}
 
 		private static void InitializeCallRecordings()

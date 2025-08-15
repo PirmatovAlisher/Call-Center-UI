@@ -1,0 +1,55 @@
+﻿
+<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Normal" AlignItems="AlignItems.Normal" Gap="15px">
+
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+		<RadzenStack Orientation="Orientation.Vertical">
+			<RadzenText TextStyle="TextStyle.DisplayH5"><stong>SMS Messages</stong></RadzenText>
+			<RadzenText TextStyle="TextStyle.Subtitle2">@TotalActive Active</RadzenText>
+			<RadzenText TextStyle="TextStyle.Subtitle2">@TotalChatsToday Today</RadzenText>
+		</RadzenStack>
+		<RadzenButton Icon="add" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Medium" class="rz-border-radius-10 rz-shadow-6" />
+	</RadzenStack>
+	<!-- Search Box -->
+	<RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+		<RadzenTextBox @bind-Value="@SearchTerm"
+					   @oninput="@((e) => UpdateSearchTerm(e.Value.ToString()))"
+					   Placeholder="Search..."
+					   Style="width: 100%;" />
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="15px" class="rz-border-top">
+			<RadzenButton Text="Active"
+						  Click="@(() => SetSelectedStatus(ChatStatus.Active))"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+						  class="@(SelectedStatus == ChatStatus.Active ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+			<RadzenButton Text="Previous"
+						  Click="@(() => SetSelectedStatus(ChatStatus.Ended))"
+						  Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+						  class="@(SelectedStatus == ChatStatus.Ended ? "rz-background-color-info-lighter rz-border-radius-6 no-uppercase" : "rz-border-radius-6 no-uppercase")" />
+		</RadzenStack>
+	</RadzenStack>
+</RadzenStack>
+
+
+@code {
+
+	[Parameter] public string SearchTerm { get; set; }
+	[Parameter] public EventCallback<string> SearchTermChanged { get; set; }
+
+	[Parameter] public int TotalActive { get; set; }
+	[Parameter] public int TotalChatsToday { get; set; }
+
+	[Parameter] public ChatStatus? SelectedStatus { get; set; }
+	[Parameter] public EventCallback<ChatStatus?> SelectedStatusChanged { get; set; }
+
+	private async void SetSelectedStatus(ChatStatus status)
+	{
+		SelectedStatus = status;
+		await SelectedStatusChanged.InvokeAsync(status);
+	}
+
+	private async Task UpdateSearchTerm(string value)
+	{
+		SearchTerm = value;
+		await SearchTermChanged.InvokeAsync(value); // Notify parent component if applicable
+	}
+
+	}

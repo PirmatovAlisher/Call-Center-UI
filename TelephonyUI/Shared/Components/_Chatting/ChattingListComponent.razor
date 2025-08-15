@@ -1,0 +1,54 @@
+﻿
+
+<RadzenListBox TValue="Customer"
+			   Data="@Customers"
+			   Value="@SelectedCustomer"
+			   ValueChanged="@(async (Customer c) => await OnCustomerSelected.InvokeAsync(c))"
+			   class="borderless-listbox"
+			   Style="padding: 0; display: flex; flex-direction: column; overflow-y: auto;">
+	<Template Context="customer">
+		<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+				<RadzenStack Orientation="Orientation.Horizontal">
+					@if (LastInteraction.Status == ChatStatus.Active)
+					{
+						<RadzenCard Variant="Variant.Flat" Style="width: 10px; height: 10px;" class="rz-background-color-info rz-border-radius-10" />
+					}
+					else
+					{
+						<RadzenCard Variant="Variant.Flat" Style="width: 10px; height: 10px; background-color: transparent !important;" />
+					}
+					<!-- Gravatar -->
+					<RadzenGravatar Text="@customer.FirstName" Size="36" Style="margin-right: 15px;" />
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center">
+					<div><strong>@customer.FirstName @customer.LastName</strong></div>
+					<p>@GetTruncatedText(LastInteraction.LastMessage.Content, 25)</p>
+				</RadzenStack>
+			</RadzenStack>
+			<RadzenStack Orientation="Orientation.Vertical">
+				<p>@LastInteraction.LastMessage.Timestamp.ToString("HH:mm")</p>
+			</RadzenStack>
+		</RadzenStack>
+	</Template>
+</RadzenListBox>
+
+
+
+
+
+
+@code {
+
+	[Parameter] public List<Customer> Customers { get; set; } = new();
+	[Parameter] public Customer SelectedCustomer { get; set; } = new();
+	[Parameter] public EventCallback<Customer> OnCustomerSelected { get; set; }
+
+	[Parameter] public InteractionHistory LastInteraction { get; set; } = new();
+
+	private string GetTruncatedText(string text, int maxLength = 30)
+	{
+		return text.Length > maxLength ? text.Substring(0, maxLength) + "..." : text;
+	}
+
+}

@@ -1,0 +1,146 @@
+﻿@inject IJSRuntime JSRuntime
+
+
+<RadzenCard Variant="Variant.Flat" Style="height: 100%; padding: 0 !important;">
+	<div class="customer-view">
+		<div class="top rz-border-bottom rz-p-3">
+			<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+				<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+					@if (ShowBackButton)
+					{
+						<RadzenButton Text="Back" Click="@(() => OnBack.InvokeAsync())" Variant="Variant.Text" ButtonStyle="ButtonStyle.Info" Icon="arrow_back" />
+					}
+					<RadzenStack Orientation="Orientation.Vertical">
+						<div><strong>@Customer.FirstName @Customer.LastName</strong></div>
+						<p>@Customer.PhoneNumber</p>
+					</RadzenStack>
+				</RadzenStack>
+				<RadzenButton Text="End Chat" Click="@(() => OnEndChat.InvokeAsync())" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Base" />
+			</RadzenStack>
+		</div>
+		<div class="middle rz-p-3">
+			@foreach (var interaction in Customer.Interactions.Where(i => i.Type == InteractionType.Chat))
+			{
+				<p>@interaction.InteractionDate.ToShortDateString()</p>
+
+				foreach (var message in interaction.Messages)
+				{
+					<div style="margin: 10px 0; text-align: @(message.IsCustomerMessage? "right" : "left");">
+						<RadzenCard Style="@messageStyle(message)" class="@(message.IsCustomerMessage ? "rz-background-color-info-lighter" : "rz-background-color-base-100")">
+							<p style="display: inline-block; max-width: 600px;  white-space: normal; word-break: break-word; text-align: left">
+								@message.Content
+							</p>
+							<div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+								@message.Timestamp.ToString("g")
+							</div>
+						</RadzenCard>
+					</div>
+				}
+			}
+		</div>
+		<div class="bottom rz-border-top rz-p-3">
+			<!-- Message Input (same as before) -->
+			<RadzenTextArea id="messageTextArea"
+							@bind-Value="NewMessage"
+							Rows="1"
+							Placeholder="Type a message..."
+							Style="width: 100%; width: calc(100% - 36px);"
+							class="autoExpandTextArea "
+							oninput="autoResize(this)" />
+			<RadzenButton Icon="send" Click="@(() => SendMessage())"
+						  class="rz-color-primary" Style="background-color: transparent !important; box-shadow: none !important;" />
+		</div>
+	</div>
+</RadzenCard>
+
+@code {
+	[Parameter] public Customer Customer { get; set; }
+	[Parameter] public bool ShowBackButton { get; set; } = false;
+	[Parameter] public EventCallback OnBack { get; set; }
+	[Parameter] public EventCallback<ChatStatus?> OnEndChat { get; set; }
+
+	private string NewMessage { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Customer.Interactions = SeedDataProvider.Interactions.Where(x => x.Type == InteractionType.Chat &&
+																	x.CustomerId == Customer.Id).ToList();
+		foreach (var interaction in Customer.Interactions)
+		{
+			var agent = SeedDataProvider.Agents.FirstOrDefault(a => a.Id == interaction.AgentId);
+			if (agent != null)
+			{
+				interaction.Agent = agent;
+			}
+		}
+	}
+
+	private async void SendMessage()
+	{
+		if (!string.IsNullOrWhiteSpace(NewMessage) && Customer != null)
+		{
+			Customer.Interactions.Add(
+				new InteractionHistory
+					{
+						CustomerId = Customer.Id,
+						InteractionDate = DateTime.Now,
+						Type = InteractionType.Chat,
+						Summary = "",
+						AgentId = SeedDataProvider.Agents.First().Id,
+
+						Status = ChatStatus.Active,
+						Messages = new List<ChatMessage>()
+										{
+										new ChatMessage { Content = NewMessage, IsCustomerMessage = true, Timestamp = DateTime.Now }
+										}
+					}
+			);
+
+			NewMessage = string.Empty;
+			// Reset the text area height via JS Interop.
+			await JSRuntime.InvokeVoidAsync("resetTextAreaHeight", "messageTextArea");
+			StateHasChanged();
+		}
+	}
+
+	private string messageStyle(ChatMessage message)
+	{
+		return $"background-color: {(message.IsCustomerMessage ? "#e3f2fd" : "#ffffff")}; " +
+						"padding: 10px; " +
+						"border-radius: 15px; " +
+						"max-width: 70%; " +
+						"box-shadow: 0 1px 3px rgba(0,0,0,0.12); " +
+						"display: inline-block;";
+	}
+
+}
+
+<script>
+	function autoResize(textarea) {
+		// If there's no text, clear the inline height (revert to CSS min-height)
+		if (!textarea.value) {
+			textarea.style.height = "";
+			return;
+		}
+
+		// Reset the height to auto to recalc the scroll height
+		textarea.style.height = 'auto';
+
+		// Get the new scroll height
+		var newHeight = textarea.scrollHeight;
+
+		// Get the max-height defined in CSS (parse as an integer)
+		var maxHeight = parseInt(getComputedStyle(textarea).maxHeight, 10);
+
+		// If the new height exceeds the max, use maxHeight (scrolling will be enabled)
+		textarea.style.height = (newHeight > maxHeight ? maxHeight : newHeight) + 'px';
+	}
+</script>
+<script>
+	function resetTextAreaHeight(elementId) {
+		var textarea = document.getElementById(elementId);
+		if (textarea) {
+			textarea.style.height = ""; // Removing inline height lets CSS take over.
+		}
+	}
+</script>

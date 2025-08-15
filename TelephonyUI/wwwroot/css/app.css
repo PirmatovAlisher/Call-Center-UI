@@ -158,3 +158,29 @@ code {
     margin-bottom: 10px;
     z-index: 10000;
 }
+
+
+/*List box for Customer/Chatting List*/
+.borderless-listbox,
+.borderless-listbox:focus,
+.borderless-listbox:hover {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Customer View Component && Chatting content component */
+.customer-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+/* Top and bottom take their natural height */
+.top, .bottom {
+    flex: 0 0 auto;
+}
+/* Middle fills the remaining space and is scrollable */
+.middle {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0; /* Ensure it can shrink as needed */
+}

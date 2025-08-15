@@ -1,18 +1,4 @@
-﻿@* <div style="height: 100%; overflow-y: auto;">
-	@foreach (var customer in Customers)
-	{
-		<div @onclick="() => OnCustomerSelected.InvokeAsync(customer)" class="customer-item">
-			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Normal" Gap="3px">
-				<!-- Gravatar -->
-				<RadzenGravatar Text="@customer.FirstName" Size="36" Style="margin-right: 15px;" />
-				<div class="rz-p-3">
-					<div>@customer.FirstName @customer.LastName</div>
-					<div class="text-small">@customer.AccountNumber</div>
-				</div>
-			</RadzenStack>
-		</div>
-	}
-</div> *@
+﻿
 <RadzenListBox TValue="Customer"
 			   Data="@Customers"
 			   Value="SelectedCustomer"
@@ -75,19 +61,4 @@
 	[Parameter] public Customer? SelectedCustomer { get; set; }
 	[Parameter] public EventCallback<Customer> OnCustomerSelected { get; set; }
 
-
-	private string GetItemClass(Customer customer)
-	{
-		return customer == SelectedCustomer ? "customer-item rz-state-highlight" : "customer-item";
-	}
 }
-
-<style>
-	.borderless-listbox,
-	.borderless-listbox:focus,
-	.borderless-listbox:hover {
-		border: none !important;
-		box-shadow: none !important;
-	}
-
-</style>
