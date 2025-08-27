@@ -1,21 +1,23 @@
-# Stage 1: Build the application
+# Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /source
+WORKDIR /app
 
-# Copy the project file and restore dependencies
+# Copy csproj and restore
+COPY *.sln .
 COPY TelephonyUi.csproj .
 RUN dotnet restore
 
-# Copy the rest of the application code
+# Copy all files and build
 COPY . .
+WORKDIR /app/TelephonyUI 
+RUN dotnet publish -c Release -o /app/publish
 
-# Publish the application
-RUN dotnet publish -c Release -o /app --no-restore
-
-# Stage 2: Create the final runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=build /app/publish .
 
-# Set the entry point to run the application
-ENTRYPOINT ["dotnet", "TelephonyUi.dll"]
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "TelephonyUI.dll"]
