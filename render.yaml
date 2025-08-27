@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: telephony-ui-blazor-app
+    env: docker
+    plan: free
+    repo: https://github.com/your-username/your-repo-name
+    healthCheckPath: /
+    autoDeploy: false
+    envVars:
+      - key: ASPNETCORE_URLS
+        value: http://+:$PORT
