@@ -22,5 +22,9 @@ WORKDIR /app
 # We're copying everything from the temporary /app/publish folder.
 COPY --from=build /app/publish .
 
+# Configure ASP.NET Core to bind to port 8080 on all interfaces for Render
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
 # Set the entry point to run the published application's DLL
 ENTRYPOINT ["dotnet", "TelephonyUI.dll"]
